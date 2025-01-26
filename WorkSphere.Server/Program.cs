@@ -23,25 +23,15 @@ namespace WorkSphere.Server
                     .UseSqlServer(connection)
             );
 
-            try
-            {
-                using (var con = new SqlConnection(connection))
-                {
-                    con.Open();
-                }
-
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.Message);
-            }
-
 
             // Add services to the container.
 
             builder.Services.AddControllers();
 
+            // Configure Swagger
+
             var app = builder.Build();
+
 
             // Configure the HTTP request pipeline.
 
@@ -49,8 +39,8 @@ namespace WorkSphere.Server
 
             app.UseAuthorization();
 
-
             app.MapControllers();
+
 
             app.Run();
         }

@@ -7,14 +7,14 @@
     public enum Role
     {
         Admin,
-        Agent,
-        Customer
+        ProjectManager,
+        Employee
     }
     public class ApplicationUser : IdentityUser
     {
 
         [Required]
-        public Role Role { get; set; } // Employee, Manager, Admin
+        public string Role { get; set; }
     }
 
     public class EmployeeUser : ApplicationUser
@@ -28,8 +28,8 @@
 
     public class ProjectManagerUser : ApplicationUser
     {
-        [ForeignKey("ManagerID")]
-        public int? ManagerID { get; set; }
+        [ForeignKey("ProjectManagerID")]
+        public int? ProjectManagerId { get; set; }
 
         // One ManagerUser can be associated with one Manager
         public virtual ProjectManager? ProjectManager { get; set; }

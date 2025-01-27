@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 using WorkSphere.Model;
 
 namespace WorkSphere.Server.Model
@@ -24,6 +25,8 @@ namespace WorkSphere.Server.Model
 
         //Navigation Properties
         // Relationship: One Salary is tied to one Employee
+        [JsonIgnore] // Prevent cyclic references. This will prevent the Salary object from being serialized when the Employee object is serialized
+
         public virtual Employee? Employee { get; set; }
         public int? EmployeeID { get; set; }
     }

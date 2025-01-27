@@ -21,7 +21,6 @@ namespace WorkSphere.Server.Model
         [Required]
         public DateTime EmploymentDate { get; set; }
         [DataType(DataType.Date)]
-        public string? PhoneNumber { get; set; }
 
         [NotMapped]
         public string? FullName

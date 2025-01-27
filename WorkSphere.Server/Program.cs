@@ -12,7 +12,20 @@ namespace WorkSphere.Server
     {
         public static async Task Main(string[] args)
         {
+            var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
+
             var builder = WebApplication.CreateBuilder(args);
+
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy(name: MyAllowSpecificOrigins,
+                                  policy =>
+                                  {
+                                      policy.WithOrigins("http://127.0.0.1:4200") // Explicitly allow the frontend origin
+                                            .AllowAnyHeader() // Allow any headers
+                                            .AllowAnyMethod(); // Allow any HTTP methods (GET, POST, etc.)
+                                  });
+            });
 
             //add the connection string to the services
 
@@ -92,7 +105,6 @@ namespace WorkSphere.Server
                     logger.LogError(ex, "An error occured seeding the DB.");
                 }
             }
-
             app.UseDefaultFiles();
             app.UseStaticFiles();
 
@@ -106,6 +118,8 @@ namespace WorkSphere.Server
             // Configure the HTTP request pipeline.
 
             app.UseHttpsRedirection();
+            app.UseCors(MyAllowSpecificOrigins);
+
 
             app.UseAuthorization();
 

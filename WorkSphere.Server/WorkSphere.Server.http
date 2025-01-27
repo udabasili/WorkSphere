@@ -1,9 +1,23 @@
 @WorkSphere.Server_HostAddress = http://localhost:5125
 
-GET {{WorkSphere.Server_HostAddress}}/weatherforecast/
-Accept: application/json
-
 ###
 
 GET {{WorkSphere.Server_HostAddress}}/api/employees
 Accept : application/json
+
+###
+GET {{WorkSphere.Server_HostAddress}}/api/employees/1
+
+### 
+GET {{WorkSphere.Server_HostAddress}}/api/projects
+
+###
+GET {{WorkSphere.Server_HostAddress}}/api/projects/1
+
+
+### 
+GET {{WorkSphere.Server_HostAddress}}/api/projectmanagers
+
+
+###
+GET {{WorkSphere.Server_HostAddress}}/api/projectmanagers/1

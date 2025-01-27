@@ -16,15 +16,28 @@ namespace WorkSphere.Server
 
             //add the connection string to the services
 
-            var conStrBuilder = new SqlConnectionStringBuilder(
-                    builder.Configuration.GetConnectionString("DefaultConnection"));
-            conStrBuilder.Password = builder.Configuration["Database:password"];
-            var connection = conStrBuilder.ConnectionString;
+            //if environment is development, use the user secrets
+            if (builder.Environment.IsDevelopment())
+            {
+                builder.Services.AddDbContext<WorkSphereDbContext>(options =>
+                    options
+                        .UseSqlServer(builder.Configuration.GetConnectionString("LocalConnection"))
+                );
+            }
+            else
+            {
+                var conStrBuilder = new SqlConnectionStringBuilder(
+                    builder.Configuration.GetConnectionString("ProductionConnection"));
+                conStrBuilder.Password = builder.Configuration["Database:password"];
+                var connection = conStrBuilder.ConnectionString;
 
-            builder.Services.AddDbContext<WorkSphereDbContext>(options =>
-                options
-                    .UseSqlServer(connection)
-            );
+                builder.Services.AddDbContext<WorkSphereDbContext>(options =>
+                    options
+                        .UseSqlServer(connection)
+                );
+            }
+
+
 
             //add authentication services
             builder.Services.AddAuthorization();
@@ -70,7 +83,8 @@ namespace WorkSphere.Server
                     var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
                     var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
 
-                    await ContextSeed.SeedDataAsync(userManager, roleManager);
+                    await ContextSeed.SeedRoleAsync(userManager, roleManager);
+                    await SeedData.SeedDataAsync(context, userManager, roleManager);
                 }
                 catch (Exception ex)
                 {

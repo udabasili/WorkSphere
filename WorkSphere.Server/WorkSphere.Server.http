@@ -4,3 +4,6 @@ GET {{WorkSphere.Server_HostAddress}}/weatherforecast/
 Accept: application/json
 
 ###
+
+GET {{WorkSphere.Server_HostAddress}}/api/employees
+Accept : application/json

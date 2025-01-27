@@ -53,7 +53,7 @@ namespace WorkSphere.Data
             modelBuilder.Entity<ProjectManagerUser>()
                 .HasOne(pm => pm.ProjectManager)
                 .WithMany()
-                .HasForeignKey(pm => pm.ManagerID)
+                .HasForeignKey(pm => pm.ProjectManagerId)
                 .OnDelete(DeleteBehavior.SetNull); // Allow project manager user to exist without a project manager
 
             // EmployeeUser ↔ Employee One-to-One relationship

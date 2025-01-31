@@ -10,34 +10,49 @@ namespace WorkSphere.Server.Controllers
     public class EmployeesController : ControllerBase
     {
         private readonly WorkSphereDbContext _context;
+        private readonly ILogger _logger;
 
-        public EmployeesController(WorkSphereDbContext context)
+
+        public EmployeesController(WorkSphereDbContext context, ILogger<EmployeesController> logger)
         {
             _context = context;
+            _logger = logger;
+
         }
 
         // GET: api/Employees
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Employee>>> GetEmployees()
+        public async Task<ActionResult<IEnumerable<Employee>>> GetEmployees(int pageIndex, int pageSize)
         {
-            var employees = await _context
-                .Employees
-                .Include(e => e.Salary)
-                .Include(e => e.ProjectTasks)
-                .ToListAsync();
-            return employees;
+            /**
+             * Response Object
+             * {
+                    employees: Employee[],
+                    pageIndex: number,
+                    pageSize: number,
+                    totalCount: number
+                  }
+             * **/
+            var employees = await _context.Employees.Skip(pageIndex * pageSize).Take(pageSize).ToListAsync();
+            var totalCount = await _context.Employees.CountAsync();
+
+            return Ok(new { employees, totalCount, pageIndex, pageSize });
         }
+
 
         // GET: api/Employees/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Employee>> GetEmployee(int id)
         {
-            var employee = await _context.Employees.FindAsync(id);
+            var employee = await _context.Employees
+                .Include(employee => employee.Salary)
+                .FirstOrDefaultAsync(employee => employee.Id == id);
 
             if (employee == null)
             {
                 return NotFound();
             }
+
 
             return employee;
         }
@@ -64,6 +79,11 @@ namespace WorkSphere.Server.Controllers
                 {
                     return NotFound();
                 }
+                if (EmployeeEmailExists(employee.Email))
+                {
+                    return BadRequest("Email already exists");
+                }
+
                 else
                 {
                     throw;
@@ -76,8 +96,18 @@ namespace WorkSphere.Server.Controllers
         // POST: api/Employees
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Employee>> PostEmployee(Employee employee)
+        public async Task<ActionResult<Employee>> PostEmployee([FromBody] Employee employee)
         {
+            if (employee == null)
+            {
+                return BadRequest("Invalid employee data");
+            }
+
+            if (EmployeeEmailExists(employee.Email))
+            {
+                return BadRequest("Email already exists");
+            }
+
             _context.Employees.Add(employee);
             await _context.SaveChangesAsync();
 
@@ -103,6 +133,12 @@ namespace WorkSphere.Server.Controllers
         private bool EmployeeExists(int id)
         {
             return _context.Employees.Any(e => e.Id == id);
+        }
+
+        //check if employee email exists
+        private bool EmployeeEmailExists(string email)
+        {
+            return _context.Employees.Any(e => e.Email == email);
         }
     }
 }

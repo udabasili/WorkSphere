@@ -1,1 +1,91 @@
+/** import css files  from styles folder */
+@import url('./styles/toast.css');
 /* You can add global styles to this file, and also import other style files */
+@import "tailwindcss";
+
+
+html, body {
+  height: 100%;
+}
+
+:root {
+  --primary-color: #4354BC;
+  --secondary-color: #BCAB43;
+  --background-color: #EDF2FF;
+  --font-heading: 'Poppins', sans-serif;
+  --font-paragraph: 'Roboto', sans-serif;
+}
+
+/* Use the colors in Tailwind */
+.bg-primary {
+  background-color: var(--primary-color);
+}
+
+.text-primary {
+  color: var(--primary-color);
+}
+
+.bg-secondary {
+  background-color: var(--secondary-color);
+}
+
+
+.bg-background {
+  background-color: var(--background-color);
+}
+
+
+/* Use the fonts in Tailwind */
+body {
+  font-family: var(--font-paragraph), serif;
+  color: #333;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading), sans-serif;
+  font-weight: 700;
+}
+
+.text-paragraph {
+  font-family: var(--font-paragraph), serif;
+  color: #333;
+}
+
+.text-heading {
+  font-family: var(--font-heading), sans-serif;
+}
+
+/**Ng Primer */
+/* You can add global styles to this file, and also import other style files */
+.p-drawer-header,
+.p-drawer-content,
+.p-drawer-footer {
+  background-color: var(--primary-color);
+  color: #fff;
+}
+
+.p-breadcrumb {
+  background-color: transparent !important;
+  font-family: var(--font-paragraph), serif;
+
+}
+
+.p-breadcrumb-item-link {
+  color: black !important;
+  cursor: pointer;
+}
+
+.p-breadcrumb-item-link:hover .p-breadcrumb-item-label {
+  color: grey !important;
+
+}
+
+.p-inputtext:enabled:focus {
+  border-color: var(--secondary-color) !important;
+  box-shadow: 0 0 0 0.2rem rgba(67, 84, 188, 0.25);
+}
+
+.p-iftalabel:has(input:focus) label {
+  color: var(--secondary-color) !important;
+}
+

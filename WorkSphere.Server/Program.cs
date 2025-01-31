@@ -15,13 +15,15 @@ namespace WorkSphere.Server
             var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 
             var builder = WebApplication.CreateBuilder(args);
+            builder.Logging.ClearProviders();
+            builder.Logging.AddConsole();
 
             builder.Services.AddCors(options =>
             {
                 options.AddPolicy(name: MyAllowSpecificOrigins,
                                   policy =>
                                   {
-                                      policy.WithOrigins("http://127.0.0.1:4200") // Explicitly allow the frontend origin
+                                      policy.WithOrigins("http://127.0.0.1:4200", "http://localhost:4200") // Explicitly allow the frontend origin
                                             .AllowAnyHeader() // Allow any headers
                                             .AllowAnyMethod(); // Allow any HTTP methods (GET, POST, etc.)
                                   });

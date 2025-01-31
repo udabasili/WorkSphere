@@ -37,6 +37,7 @@ import {ConfirmationService, MessageService} from 'primeng/api';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {ToastrModule} from 'ngx-toastr';
 import {ConfirmDialogModule} from 'primeng/confirmdialog';
+import { ProjectsComponent } from './features/project/components/projects/projects.component';
 
 @NgModule({
   declarations: [
@@ -49,6 +50,7 @@ import {ConfirmDialogModule} from 'primeng/confirmdialog';
     ActivityComponent,
     SectionHeaderComponent,
     ManageEmployeeComponent,
+    ProjectsComponent,
   ],
   imports: [
     BrowserModule,

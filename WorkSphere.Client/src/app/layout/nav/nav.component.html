@@ -1,0 +1,41 @@
+<header class="bg-white black px-4 py-4 shadow-md h-[5rem] flex items-center justify-between w-full">
+  <!-- Left side: Close button -->
+  <div class="flex items-center">
+    <button
+      (click)="openSideNav()"
+      class="text-white bg-primary hover:opacity-75 cursor-pointer font-medium rounded-lg text-sm p-2.5 text-center inline-flex items-center md:hidden"
+      type="button">
+      <mat-icon aria-hidden="false" aria-label="Example menu icon" class="flex items-center" fontIcon="menu"></mat-icon>
+      <span class="sr-only">Icon description</span>
+    </button>
+  </div>
+  <div class="flex items-center gap-4">
+    <!--    <nav aria-label="Secondary navigation" class="flex">-->
+    <!--      <ul class="flex gap-4">-->
+    <!--        <li class="demo-section">-->
+    <!--          <mat-icon matBadge="15">home</mat-icon>-->
+    <!--          <span class="cdk-visually-hidden">-->
+    <!--            Example with a home icon with overlaid badge showing the number 15-->
+    <!--          </span>-->
+    <!--        </li>-->
+    <!--        <li class="demo-section">-->
+    <!--          <mat-icon matBadge="15">home</mat-icon>-->
+    <!--          <span class="cdk-visually-hidden">-->
+    <!--            Example with a home icon with overlaid badge showing the number 15-->
+    <!--          </span>-->
+    <!--        </li>-->
+    <!--      </ul>-->
+    <!--    </nav>-->
+
+    <div class="flex items-center gap-4">
+      <div
+        class="relative inline-flex items-center justify-center w-10 h-10 overflow-hidden bg-gray-100 rounded-full dark:bg-gray-600">
+        <span class="font-medium text-gray-600 dark:text-gray-300">JL</span>
+      </div>
+      <div class="font-medium">
+        <div>Jese Leos</div>
+        <div class="text-sm text-gray-500 dark:text-gray-400">Joined in August 2014</div>
+      </div>
+    </div>
+  </div>
+</header>

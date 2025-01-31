@@ -1,0 +1,75 @@
+<aside
+  class="bg-primary text-white
+  w-0 md:w-min lg:w-64 h-full
+  fixed md:relative lg:fixed top-0 left-0
+  overflow-x-hidden
+  z-40 md:z-0
+  shadow-md flex flex-col items-center
+  transition-all duration-300 ease-in-out"
+  id="side-nav">
+  <div class="h-[5rem] flex items-center w-full justify-between px-4 mt-7">
+    <div class="flex flex-col items-center grid grid-flow-col grid-rows-2 gap-x-4 items-center">
+      <img alt="WorkSphere Logo" class="w-6 h-6 md:w-10 md:h-10 row-span-2" src="logo.png">
+      <h2 class="text-lg lg:text-2xl font-extrabold md:hidden lg:flex">WorkSphere</h2>
+      <span class="text-[0.8rem] text-center md:hidden lg:flex">Project Manager Admin</span>
+    </div>
+    <button
+      (click)="closeSideNav()"
+      class="block md:hidden bg-red-600 rounded-md p-2 inline-flex items-center justify-center text-gray-400 cursor-pointer hover:bg-red-400"
+      type="button">
+      <span class="sr-only">Close menu</span>
+      <svg aria-hidden="true" class="h-6 w-6" fill="none" stroke="white" viewBox="0 0 24 24"
+           xmlns="http://www.w3.org/2000/svg">
+        <path d="M6 18L18 6M6 6l12 12" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+      </svg>
+    </button>
+  </div>
+  <nav aria-label="Main navigation" class="h-full w-full p-4">
+    <ul class="flex flex-col justify-around w-full">
+      <li *ngFor="let link of sideNavItems" class="relative">
+        <a
+          (click)="setActiveItem(link.route)"
+          *ngIf="!link.children"
+          [routerLink]="link.route"
+          class="flex items-center space-x-4 mb-2 rounded-lg cursor-pointer w-[4/5] justify-stretch py-3 px-2.5 {{link.route === activeItem ? 'text-black bg-white' : ''}}">
+          <mat-icon
+            aria-hidden="false"
+            aria-label="Example home icon"
+            class="flex items-center"
+            fontIcon="{{link.icon}}">
+          </mat-icon>
+          <span class="md:hidden lg:flex font-semibold text-heading">{{ link.label }}</span>
+        </a>
+        <span
+          *ngIf="link?.children && link?.children.length > 0"
+          class="flex space-x-4 mb-2 justify-between items-center
+          rounded-lg -[4/5] justify-stretch py-3 px-2.5
+        }}">
+          <span class="md:hidden lg:flex font-semibold text-heading">{{ link.label }}</span>
+          <mat-icon
+            aria-hidden="false"
+            aria-label="Example arrow icon"
+            class="flex items-center"
+            fontIcon="arrow_drop_down">
+          </mat-icon>
+        </span>
+        <ul *ngIf="link?.children && link?.children.length > 0" class="pl-6">
+          <li *ngFor="let child of link?.children">
+            <a
+              (click)="setActiveItem(child.route)"
+              [routerLink]="child.route"
+              class="flex items-center space-x-4 mb-2 rounded-lg cursor-pointer w-[4/5] justify-stretch py-3 px-2.5 {{child.route === activeItem ? 'text-black bg-white' : ''}}">
+              <mat-icon
+                aria-hidden="false"
+                aria-label="Child Icon"
+                class="flex items-center"
+                fontIcon="{{child.icon}}">
+              </mat-icon>
+              <span class="md:hidden lg:flex font-semibold text-heading">{{ child.label }}</span>
+            </a>
+          </li>
+        </ul>
+      </li>
+    </ul>
+  </nav>
+</aside>

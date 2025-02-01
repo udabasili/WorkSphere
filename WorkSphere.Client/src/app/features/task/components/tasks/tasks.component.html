@@ -9,29 +9,50 @@
         <p-dropdown [(ngModel)]="selectedProject" [options]="projectSelectionOptions"
                     class="w-1/2 mr-5" optionLabel="name" placeholder="Select a Project">
         </p-dropdown>
-        <p-button (click)="onProjectSelected()" label="Select" severity="success"/>
+        <p-button (click)="handleProjectSelected()" label="Select" severity="success"/>
       </div>
     </div>
 
     <!-- Team Section (Displayed after selecting a project) -->
-    <div *ngIf="selectedProject" class="mt-6">
+    <div *ngIf="selectedProjectConfirmed" class="mt-6">
       <div class="mb-4">
         <span class="text-lg font-semibold">Team Members:</span>
+        <!-- no Team is defined below  ng-template #noTeam-->
         <div *ngIf="teamMembers.length > 0; else noTeam" class="flex mt-2">
           <div class="flex -space-x-2">
-            <img *ngFor="let member of teamMembers" [alt]="member.name"
-                 [src]="member.avatar"
-                 class="w-10 h-10 rounded-full border-2 border-white shadow-md"/>
+            <span>
+              {{ teamMembers.length }} team members assigned.
+            </span>
           </div>
         </div>
         <ng-template #noTeam>
           <p class="text-gray-500">No team members assigned.</p>
         </ng-template>
       </div>
-
-      <!-- Add Team Button -->
       <p-button (click)="addTeam()" class="mt-2" icon="pi pi-plus" label="Add Team"></p-button>
     </div>
+
+  </div>
+  <div *ngIf="tasks.length > 0" class="mt-6 w-full">
+    <div class="flex justify-between items-center">
+        <span>
+          Drag and drop to re-order tasks and click submit to save changes.
+        </span>
+      <p-button class="mt-2" icon="pi pi-check" label="Submit" severity="success"></p-button>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-4  w-full">
+
+      <div class="p-4">
+        <div class="flex justify-between items-center">
+          <span class="text-lg font-semibold">To-Do List (24)</span>
+          <!-- add icon button only -->
+          <i class="fa fa-plus"></i>
+        </div>
+      </div>
+      <div class="bg-white shadow-md rounded-lg p-4">Column 2</div>
+      <div class="bg-white shadow-md rounded-lg p-4">Column 3</div>
+    </div>
+
   </div>
 </section>
 

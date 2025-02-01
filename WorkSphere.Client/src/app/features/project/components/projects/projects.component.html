@@ -1,1 +1,115 @@
-<p>projects works!</p>
+<p-confirmdialog></p-confirmdialog>
+<section>
+  <app-activity [show]="isLoading"></app-activity>
+  <app-section-header [home]="home" [items]="items" [title]="header"></app-section-header>
+  <div
+    *ngIf="!showDetailsProject"
+    class="container bg-white shadow-md rounded-lg p-4 mt-4 overflow-x-auto ">
+    <div class="flex justify-between items-center">
+      <div class="flex items center">
+        <div class="example-button-container">
+          <button
+            (click)="openDrawer()"
+            class="text-white bg-primary hover:opacity-75 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center me-2 cursor-pointer"
+            type="button">
+            <span>Add Project</span>
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="flex flex-col mt-4">
+      <table class="w-full text-sm text-left rtl:text-right text-gray-500 my-6">
+        <thead class="text-xs text-gray-700 uppercase bg-gray-50 ">
+        <tr>
+          <th class="px-6 py-3" scope="col"> ID</th>
+          <th class="px-6 py-3" scope="col"> Name</th>
+          <th class="px-6 py-3" scope="col">Start Date</th>
+          <th class="px-6 py-3" scope="col">End Date</th>
+          <th class="px-6 py-3" scope="col"></th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr
+          *ngFor="let project of projects" class="bg-white border-b  border-gray-200">
+          <td class="px-6 py-4">{{ project.id }}</td>
+          <td class="px-6 py-4">{{ project.name }}</td>
+          <td class="px-6 py-4">{{ project.startDate | date }}</td>
+          <td class="px-6 py-4">{{ project.endDate | date }}</td>
+          <td class="px-6 py-4 flex items-center">
+            <button
+              (click)="openDrawer(project.id)"
+              class="text-white bg-primary
+              hover:bg-blue-800 font-medium rounded-lg
+              text-sm px-5 py-2.5 text-center inline-flex
+              items-center me-2 cursor-pointer
+              my-2 md:my-0"
+              type="button">
+              <span class="ms-2">Edit</span>
+            </button>
+            <button
+              class="text-white bg-red-700 hover:bg-red-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center me-2 cursor-pointer"
+              type="button">
+              <span class="ms-2">Delete</span>
+            </button>
+            <button
+              class="text-white bg-green-700 hover:bg-green-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center me-2 cursor-pointer"
+              type="button">
+              <span class="ms-2">View</span>
+            </button>
+          </td>
+        </tr>
+        </tbody>
+        <tr *ngIf="!projects.length">
+          <td class="px-6 py-4" colspan="6">
+            <div class="flex justify-center items-center">
+              <span class="text-gray-500">No projects found</span>
+            </div>
+          </td>
+        </tr>
+      </table>
+      <div *ngIf="!!projects.length" class="flex flex-col items-center">
+        <span class="text-sm text-gray-700 dark:text-gray-400">
+          Showing <span class="font-semibold text-gray-900 "> {{ pageIndex * pageSize + 1 }} </span>
+          to <span
+          class="font-semibold text-gray-900"> {{ ((pageIndex + 1) * pageSize) + pageSize < totalRecords ? ((pageIndex + 1) * pageSize) : totalRecords }} </span>
+          of <span class="font-semibold text-gray-900"> {{ totalRecords }}  </span> records
+        </span>
+        <div class="inline-flex mt-2 xs:mt-0">
+          <button
+            (click)="prevPage()"
+            class="flex items-center
+            justify-center px-3 h-8 text-sm font-medium
+            text-white rounded-s
+            font-medium text-white bg-[#4354BC]
+            disabled:bg-gray-300 disabled:cursor-not-allowed
+            "
+            disabled="{{pageIndex === 0 ? 'disabled' : ''}}">
+            Prev
+          </button>
+          <button
+            (click)="nextPage()"
+            class="flex items-center
+            cursor-pointer
+            justify-center px-3 h-8 text-sm
+            font-medium text-white bg-[#4354BC]
+            disabled:bg-gray-300 disabled:cursor-not-allowed
+            "
+            disabled="{{(pageIndex + 1) * pageSize >= totalRecords ? 'disabled' : ''}}">
+            Next
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+<app-manage-project
+  (projectSaved)="loadProject()"
+  (visibilityChange)="handleDrawerVisibilityChange($event)"
+  *ngIf="showAddProject"
+  [projectId]="selectedProjectId"
+  [visible]="showAddProject"></app-manage-project>
+<app-project-details
+  *ngIf="showDetailsProject"
+  [projectId]="selectedProjectId"
+></app-project-details>

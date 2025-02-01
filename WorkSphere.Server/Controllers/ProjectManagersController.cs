@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using WorkSphere.Data;
 using WorkSphere.Server.Model;
@@ -23,9 +18,12 @@ namespace WorkSphere.Server.Controllers
 
         // GET: api/ProjectManagers
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<ProjectManager>>> GetProjectManagers()
+        public async Task<ActionResult<IEnumerable<ProjectManager>>> GetProjectManagers(int pageIndex, int pageSize)
         {
-            return await _context.ProjectManagers.ToListAsync();
+            return await _context.ProjectManagers
+                .Skip(pageIndex * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
         }
 
         // GET: api/ProjectManagers/5

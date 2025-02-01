@@ -1,10 +1,11 @@
-import {Component, Input, OnChanges, OnDestroy, OnInit} from '@angular/core';
+import {Component, Input, OnDestroy, OnInit} from '@angular/core';
 import {firstValueFrom, Subject, Subscription, takeUntil} from 'rxjs';
 import {EmployeeService} from '../../services/employee.service';
 import {Employee} from '../../model/employee';
 import {ConfirmationService, MenuItem} from 'primeng/api';
 import {ActivatedRoute, Router} from '@angular/router';
 import {ToastService} from '../../../../services/toast.service';
+import {ErrorHandlerService} from '../../../../core/services/error-handler.service';
 
 @Component({
   selector: 'app-employees',
@@ -13,11 +14,10 @@ import {ToastService} from '../../../../services/toast.service';
   styleUrl: './employees.component.css'
 })
 
-export class EmployeesComponent implements OnInit, OnDestroy, OnChanges {
+export class EmployeesComponent implements OnInit, OnDestroy {
   @Input() visible = false;
 
   employees: Employee[] = [];
-  messages: string[] = [];
   isLoading = true;
   showAddEmployee = false;
   showDetailsEmployee: boolean = false
@@ -38,6 +38,7 @@ export class EmployeesComponent implements OnInit, OnDestroy, OnChanges {
     private router: Router,
     private confirmationService: ConfirmationService,
     private toastService: ToastService,
+    private errorHandlerService: ErrorHandlerService
   ) {
   }
 
@@ -77,14 +78,10 @@ export class EmployeesComponent implements OnInit, OnDestroy, OnChanges {
     );
   }
 
-  // CALL ON CHANGE WHEN A NEW EMPLOYEE IS ADDED i.e modal is closed
-  ngOnChanges(): void {
-    console.log('on changes')
-  }
-
   async loadEmployees(pageIndex: number = 0, pageSize: number = 10) {
     try {
       //get all employees
+      //firstValueFrom is used to convert an observable to a promise
       const response = await firstValueFrom(this.employeeService.getEmployees(pageIndex, pageSize));
       this.employees = response.employees;
       this.pageIndex = response.pageIndex;
@@ -93,12 +90,16 @@ export class EmployeesComponent implements OnInit, OnDestroy, OnChanges {
       this.isLoading = false;
       this.setSelectedEmployeeFromRoute();
     } catch (error: any) {
-      this.messages.push(error.message || "Failed to load employees.");
+      this.errorHandlerService.apiErrorHandler(error);
       this.isLoading = false;
+
     }
   }
 
   setSelectedEmployeeFromRoute(): void {
+    //get the employee id from the route
+    //takeUntil is used to unsubscribe from the observable when the component is destroyed
+    //we are piping the observable to get the query params
     this.route.queryParams.pipe(takeUntil(this.destroy$)).subscribe(params => {
       const employeeId = parseInt(params['id'], 10);
       if (employeeId) {
@@ -154,10 +155,13 @@ export class EmployeesComponent implements OnInit, OnDestroy, OnChanges {
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
-
     if (this.deleteEmployeeSubscription) {
       this.deleteEmployeeSubscription.unsubscribe();
     }
+    this.showAddEmployee = false;
+    this.showDetailsEmployee = false;
+    this.selectedEmployeeId = null;
+    
   }
 
   private deleteEmployee(employeeId: number): void {
@@ -167,8 +171,9 @@ export class EmployeesComponent implements OnInit, OnDestroy, OnChanges {
         this.loadEmployees(this.pageIndex, this.pageSize);
       },
       error: (error) => {
-        this.toastService.showError('Failed to delete employee');
+        this.errorHandlerService.apiErrorHandler(error);
       }
     });
   }
+
 }

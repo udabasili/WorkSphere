@@ -1,21 +1,24 @@
 import {Injectable} from '@angular/core';
-import {API_URL, SharedService} from '../../../services/shared.service';
 import {HttpClient} from '@angular/common/http';
 import {Observable} from 'rxjs';
 import {Employee} from '../model/employee';
+import {environment} from '../../../../environments/environment';
 
+const API_URL = environment.apiUrl;
 
 @Injectable({
   providedIn: 'root'
 })
-export class EmployeeService extends SharedService {
+export class EmployeeService {
 
   constructor(private http: HttpClient) {
-    super();
   }
 
   /**
-   *
+   * Get all employees
+   * @param pageIndex The page index ie. the current page starting from 0
+   * @param pageSize The page size ie. number of records per page
+   * @returns An observable of the employees
    */
   getEmployees(pageIndex: number = 0, pageSize: number = 10): Observable<{
     employees: Employee[],
@@ -30,12 +33,12 @@ export class EmployeeService extends SharedService {
       pageSize: number,
       totalCount: number
     }>(apiMethod);
-
   }
 
   /**
    *
    * @param id
+   * @returns An observable of the employee
    */
   getEmployee(id: string): Observable<Employee> {
     const apiMethod = `${API_URL}/api/employees/${id}`;

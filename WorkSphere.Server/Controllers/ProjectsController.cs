@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using WorkSphere.Data;
 using WorkSphere.Model;
@@ -23,16 +18,20 @@ namespace WorkSphere.Server.Controllers
 
         // GET: api/Projects
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Project>>> GetProjects()
+        public async Task<ActionResult<IEnumerable<Project>>> GetProjects(int pageIndex, int pageSize)
         {
-            return await _context.Projects.ToListAsync();
+            var projects = await _context.Projects.Skip(pageIndex * pageSize).Take(pageSize).ToListAsync();
+            var totalCount = await _context.Projects.CountAsync();
+            return Ok(new { projects, totalCount, pageIndex, pageSize });
+
         }
 
         // GET: api/Projects/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Project>> GetProject(int id)
         {
-            var project = await _context.Projects.FindAsync(id);
+            var project = await _context.Projects.FirstOrDefaultAsync(project => project.Id == id);
+
 
             if (project == null)
             {
@@ -76,7 +75,7 @@ namespace WorkSphere.Server.Controllers
         // POST: api/Projects
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Project>> PostProject(Project project)
+        public async Task<ActionResult<Project>> PostProject([FromBody] Project project)
         {
             _context.Projects.Add(project);
             await _context.SaveChangesAsync();

@@ -1,0 +1,126 @@
+<div class="card flex justify-center bg-primary">
+  <div class="card flex justify-center ">
+    <p-drawer (onHide)="onClose()"
+              [(visible)]="visible" header="{{title}}"
+              position="right"
+              styleClass="!w-full md:!w-80 lg:!w-[30rem]"
+    >
+      <form #projectForm="ngForm" (ngSubmit)="onFormSubmit(projectForm)"
+            class="example-form w-full flex flex-col items-center">
+        <p-iftalabel class="!w-4/5 md:!w-full mb-4 relative">
+          <div class="flex items-center">
+            <input
+              #name="ngModel"
+              [(ngModel)]="project.name"
+              [ngClass]="{
+            'p-invalid border-red-500':
+            (name.touched || name.dirty || projectForm.submitted) &&
+            (name.hasError('required') || name.hasError('minlength'))
+    }"
+              class="w-full p-inputtext"
+              id="name"
+              minlength="2"
+              name="name"
+              pInputText
+              required
+            />
+            <label for="name">Project Name</label>
+            <i
+              [class.visible]="(name.touched || name.dirty || projectForm.submitted) &&
+                    (name.hasError('required') || name.hasError('minlength'))"
+              [title]="name.hasError('required') ? 'First Name is required' : name.hasError('minlength') ? 'Minimum length for First Name is ' + name.getError('minlength').requiredLength : ''"
+              class="fas fa-exclamation-circle err text-xl ml-2 text-red-700 invisible"
+            >
+            </i>
+          </div>
+        </p-iftalabel>
+        <p-iftalabel class="!w-4/5 md:!w-full mb-4">
+          <div class="flex items-center">
+            <textarea
+              #description="ngModel"
+              [(ngModel)]="project.description"
+              [ngClass]="{
+            'p-invalid border-red-500':
+            (description.touched || description.dirty || projectForm.submitted) &&
+            (description.hasError('required') || description.hasError('minlength'))
+    }"
+              class="w-full p-inputtext"
+              id="description"
+              minlength="2"
+              name="description"
+              pInputText
+              required></textarea>
+            <label for="description">Description</label>
+            <i
+              [class.visible]="(description.touched || description.dirty || projectForm.submitted) &&
+                    (description.hasError('required') || description.hasError('minlength'))"
+              [title]="description.hasError('required') ? 'Last Name is required' : description.hasError('minlength') ? 'Minimum length for Last Name is ' + description.getError('minlength').requiredLength : ''"
+              class="fas fa-exclamation-circle err text-xl ml-2 text-red-700 invisible"
+            >
+            </i>
+          </div>
+        </p-iftalabel>
+        <p-iftalabel class="!w-4/5 md:!w-full mb-4 flex items-center">
+          <div class="flex items-center">
+            <input
+              #startDate="ngModel"
+              (ngModelChange)="validateDate(startDate)"
+              [(ngModel)]="project.startDate "
+              [ngClass]="{
+        'p-invalid border-red-500':
+        (startDate.touched || startDate.dirty || projectForm.submitted) &&
+        (startDate.hasError('required') || startDate.hasError('maxDate'))
+      }"
+              class="w-full"
+              id="startDate"
+              name="startDate"
+              pInputText
+              required
+              type="date"/>
+            <label for="startDate">Start Date</label>
+            <i
+              [class.visible]="(startDate.touched || startDate.dirty || projectForm.submitted) &&
+          (startDate.hasError('required') || startDate.hasError('dateError'))"
+              [title]="startDate.hasError('required') ? 'Start Date is required' : startDate.hasError('dateError') ? 'Start Date must be now or in the future' : ''"
+              class="fas fa-exclamation-circle err text-xl ml-2 text-red-700 invisible">
+            </i>
+          </div>
+        </p-iftalabel>
+        <p-iftalabel class="!w-4/5 md:!w-full mb-4 flex items-center">
+          <div class="flex items-center">
+            <input
+              #endDate="ngModel"
+              (ngModelChange)="validateDate(endDate)"
+              [(ngModel)]="project.endDate  "
+              [ngClass]="{
+        'p-invalid border-red-500':
+        (endDate.touched || endDate.dirty || projectForm.submitted) &&
+        (endDate.hasError('required') || endDate.hasError('dateError'))
+      }"
+              class="w-full"
+              id="endDate"
+              name="endDate"
+              pInputText
+              required
+              type="date"/>
+            <label for="endDate">End Date</label>
+            <i
+              [class.visible]="(endDate.touched || endDate.dirty || projectForm.submitted) &&
+          (endDate.hasError('required') || endDate.hasError('dateError'))"
+              [title]="endDate.hasError('required') ? 'End Date is required' : endDate.hasError('dateError') ? 'End Date cannot be before Start Date' : ''"
+              class="fas fa-exclamation-circle err text-xl ml-2 text-red-700 invisible">
+            </i>
+          </div>
+        </p-iftalabel>
+        <div class="card flex justify-center gap-4">
+          <p-button
+            [loading]="buttonLoading"
+            icon="pi pi-check"
+            label="Submit"
+            type="submit"/>
+        </div>
+      </form>
+    </p-drawer>
+  </div>
+</div>
+

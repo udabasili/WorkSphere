@@ -20,11 +20,24 @@ export class SideNavComponent implements OnInit {
       children: null
     },
     {
-      label: 'Manager Dashboard',
-      icon: 'manage_accounts', // Material Icons
-      route: '/manager-dashboard',
-      role: ['ProjectManager'], // Only Project Managers can access
-      children: null
+      label: 'User Management',
+      icon: 'supervised_user_circle',
+      route: '',
+      role: ['Admin'],
+      children: [
+        {
+          label: 'Employees',
+          icon: 'people',
+          route: '/employees',
+          role: ['Admin'], // Only Admin can manage employees
+        },
+        {
+          label: 'Project Managers',
+          icon: 'person',
+          route: '/project-managers',
+          role: ['Admin'], // Only Admin can manage project managers
+        }
+      ]
     },
     {
       label: 'Project Management',
@@ -36,25 +49,33 @@ export class SideNavComponent implements OnInit {
           label: 'Projects',
           icon: 'work',
           route: '/projects',
-          role: ['Admin', 'ProjectManager'], // Only Admin and Project Managers can access
+          role: ['Admin', 'ProjectManager'],
         },
         {
           label: 'Tasks',
           icon: 'check_circle',
           route: '/tasks',
-          role: ['Admin', 'ProjectManager', 'Employee'], // Accessible to all
+          role: ['Admin', 'ProjectManager', 'Employee'],
         },
         {
           label: 'Team Management',
           icon: 'group',
           route: '/team-management',
-          role: ['Admin', 'ProjectManager'], // Only Admin and Project Managers can access
+          role: ['Admin', 'ProjectManager'],
+          children: [
+            {
+              label: 'Employees',
+              icon: 'people',
+              route: '/team-management/employees',
+              role: ['Admin', 'ProjectManager'], // Admin and Project Managers can view employees
+            }
+          ],
         },
         {
           label: 'Time Tracking',
           icon: 'access_time',
           route: '/time-tracking',
-          role: ['Admin', 'ProjectManager', 'Employee'], // Accessible to all
+          role: ['Admin', 'ProjectManager', 'Employee'],
         }
       ]
     },
@@ -68,13 +89,13 @@ export class SideNavComponent implements OnInit {
           label: 'Salaries',
           icon: 'monetization_on',
           route: '/salaries',
-          role: ['Admin'], // Only Admin can access
+          role: ['Admin'],
         },
         {
           label: 'Payroll',
           icon: 'payment',
           route: '/payroll',
-          role: ['Admin'], // Only Admin can access
+          role: ['Admin'],
         }
       ]
     },
@@ -88,25 +109,25 @@ export class SideNavComponent implements OnInit {
           label: 'Chat',
           icon: 'message',
           route: '/chat',
-          role: ['Admin', 'ProjectManager', 'Employee'], // Accessible to all
+          role: ['Admin', 'ProjectManager', 'Employee'],
         },
         {
           label: 'Messages',
           icon: 'inbox',
           route: '/messages',
-          role: ['Admin', 'ProjectManager', 'Employee'], // Accessible to all
+          role: ['Admin', 'ProjectManager', 'Employee'],
         },
         {
           label: 'Notifications',
           icon: 'notifications',
           route: '/notifications',
-          role: ['Admin', 'ProjectManager', 'Employee'], // Accessible to all
+          role: ['Admin', 'ProjectManager', 'Employee'],
         },
         {
           label: 'Announcements',
           icon: 'announcement',
           route: '/announcements',
-          role: ['Admin', 'ProjectManager'], // Admin and Project Managers can post announcements
+          role: ['Admin', 'ProjectManager'],
         }
       ]
     },
@@ -120,41 +141,21 @@ export class SideNavComponent implements OnInit {
           label: 'Reports',
           icon: 'bar_chart',
           route: '/reports',
-          role: ['Admin', 'ProjectManager'], // Only Admin and Project Manager can access
+          role: ['Admin', 'ProjectManager'],
         },
         {
           label: 'Analytics',
           icon: 'show_chart',
           route: '/analytics',
-          role: ['Admin', 'ProjectManager'], // Only Admin and Project Manager can access
+          role: ['Admin', 'ProjectManager'],
         },
-      ]
-    },
-    {
-      label: 'User Management',
-      icon: 'supervised_user_circle',
-      route: '',
-      role: ['Admin'],
-      children: [
-        {
-          label: 'Users',
-          icon: 'person',
-          route: '/users',
-          role: ['Admin'], // Only Admin can manage users
-        },
-        {
-          label: 'Roles & Permissions',
-          icon: 'lock',
-          route: '/roles',
-          role: ['Admin'], // Only Admin can manage roles and permissions
-        }
       ]
     },
     {
       label: 'Settings',
       icon: 'settings',
       route: '/settings',
-      role: ['Admin', 'ProjectManager'], // Only Admin and Project Manager can access
+      role: ['Admin', 'ProjectManager'],
       children: null
     },
     {
@@ -167,23 +168,24 @@ export class SideNavComponent implements OnInit {
           label: 'System Logs',
           icon: 'receipt_long',
           route: '/system-logs',
-          role: ['Admin'], // Only Admin can view system logs
+          role: ['Admin'],
         },
         {
           label: 'Audit Trails',
           icon: 'history',
           route: '/audit-trails',
-          role: ['Admin'], // Only Admin can view audit trails
+          role: ['Admin'],
         },
         {
           label: 'Backup & Restore',
           icon: 'backup',
           route: '/backup-restore',
-          role: ['Admin'], // Only Admin can manage backup and restore
+          role: ['Admin'],
         }
       ]
     }
   ];
+
 
   constructor(private route: ActivatedRoute) {
 

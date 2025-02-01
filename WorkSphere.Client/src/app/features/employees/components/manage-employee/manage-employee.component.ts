@@ -4,9 +4,10 @@ import {DatePipe} from '@angular/common';
 import {NgForm, NgModel} from '@angular/forms';
 import {Subscription} from 'rxjs';
 import {EmployeeService} from '../../services/employee.service';
-import {ApiErrorResponse} from '../../../../types/error';
 import {HttpErrorResponse} from '@angular/common/http';
 import {ToastService} from '../../../../services/toast.service';
+import {inputDateFormat} from '../../../../shared/utils/date-utils';
+import {ErrorHandlerService} from '../../../../core/services/error-handler.service';
 
 @Component({
   selector: 'app-manage-employee',
@@ -26,7 +27,6 @@ export class ManageEmployeeComponent implements OnInit, OnDestroy {
   saveMessage: string = '';
   mode: string = 'add';
   buttonLoading: boolean = false;
-  isLoading: boolean = false;
   employee: Employee = new Employee(
     null,
     '',
@@ -41,7 +41,9 @@ export class ManageEmployeeComponent implements OnInit, OnDestroy {
   constructor(
     private toastService: ToastService,
     private datePipe: DatePipe,
-    private employeeService: EmployeeService) {
+    private employeeService: EmployeeService,
+    private errorHandlingService: ErrorHandlerService
+  ) {
   }
 
   ngOnInit(): void {
@@ -52,7 +54,7 @@ export class ManageEmployeeComponent implements OnInit, OnDestroy {
       this.mode = 'edit';
       this.getEmployeeById(this.employeeId.toString());
     }
-
+    this.employee.employmentDate = inputDateFormat(this.employee.employmentDate, this.datePipe);
   }
 
   /**
@@ -96,7 +98,7 @@ export class ManageEmployeeComponent implements OnInit, OnDestroy {
         }
         ,
         error: (err: HttpErrorResponse) => {
-          this.handleError(err);
+          this.errorHandlingService.apiErrorHandler(err);
           this.buttonLoading = false;
         },
         complete: () => {
@@ -113,7 +115,7 @@ export class ManageEmployeeComponent implements OnInit, OnDestroy {
             this.onClose();
           },
           error: (err: HttpErrorResponse) => {
-            this.handleError(err);
+            this.errorHandlingService.apiErrorHandler(err);
             this.buttonLoading = false;
           },
           complete: () => {
@@ -146,33 +148,17 @@ export class ManageEmployeeComponent implements OnInit, OnDestroy {
       next: employee => {
         if (employee) {
           console.log(employee.id)
-          employee.employmentDate = this.datePipe.transform(employee.employmentDate, 'yyyy-MM-dd') as string;
+          employee.employmentDate = inputDateFormat(employee.employmentDate, this.datePipe);
           this.employee = employee;
         } else {
           this.toastService.showError('Employee not found')
         }
       },
       error: (err: HttpErrorResponse) => {
-        this.handleError(err);
+        this.errorHandlingService.apiErrorHandler(err);
       }
     })
   }
 
-  private handleError(err: HttpErrorResponse) {
-    const error = err.error as ApiErrorResponse
-    if (error.errors) {
-      Object.keys(error.errors).map(key => {
-          if (error.errors[key] instanceof Array) {
-            error.errors[key].map((message: string) => {
-              this.toastService.showError(message)
-            })
-
-          } else {
-            this.toastService.showError(error.errors[key])
-          }
-        }
-      )
-    }
-  }
 
 }

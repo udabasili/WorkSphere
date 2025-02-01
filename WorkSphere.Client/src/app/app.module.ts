@@ -37,7 +37,10 @@ import {ConfirmationService, MessageService} from 'primeng/api';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {ToastrModule} from 'ngx-toastr';
 import {ConfirmDialogModule} from 'primeng/confirmdialog';
-import { ProjectsComponent } from './features/project/components/projects/projects.component';
+import {ProjectsComponent} from './features/project/components/projects/projects.component';
+import {ProjectDetailsComponent} from './features/project/components/project-details/project-details.component';
+import {ManageProjectComponent} from './features/project/components/manage-project/manage-project.component';
+
 
 @NgModule({
   declarations: [
@@ -51,6 +54,9 @@ import { ProjectsComponent } from './features/project/components/projects/projec
     SectionHeaderComponent,
     ManageEmployeeComponent,
     ProjectsComponent,
+    ProjectDetailsComponent,
+    ManageProjectComponent,
+
   ],
   imports: [
     BrowserModule,
@@ -83,7 +89,7 @@ import { ProjectsComponent } from './features/project/components/projects/projec
       preventDuplicates: true,
     }),
     ConfirmDialogModule,
-    
+
   ],
   providers: [
     provideHttpClient(),

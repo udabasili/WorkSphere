@@ -1,1 +1,26 @@
-<p>project-details works!</p>
+<div class="w-full bg-background font-paragraph p-6">
+  <div *ngIf="project" class="max-w-full mx-auto p-6 md:flex md:space-x-6">
+    <!-- Left Column - Project Info -->
+    <div class="flex flex-col space-y-4 rounded-lg shadow-lg bg-white p-6 flex-1">
+      <h1 class="text-3xl font-heading text-primary mb-4">Project Details</h1>
+      <div class="border-l-4 border-primary pl-4">
+        <p class="text-lg font-bold">{{ project.name }}</p>
+        <p class="text-gray-600">{{ project.description }}</p>
+        <p class="text-gray-600">Start Date: {{ project.startDate | date }}</p>
+        <p class="text-gray-600">End Date: {{ project.endDate | date }}</p>
+        <p class="text-gray-600">Status: {{ project.status }}</p>
+      </div>
+    </div>
+
+    <!-- Right Column - Project Manager Info -->
+    <div *ngIf="project.projectManager" class="rounded-lg shadow-lg bg-white p-6 flex-1">
+      <h1 class="text-3xl font-heading text-primary mb-4">Project Manager</h1>
+      <div class="border-l-4 border-primary pl-4">
+        <p class="text-lg font-bold">{{ project.projectManager.firstName }} {{ project.projectManager.lastName }}</p>
+        <p class="text-gray-600">Email: {{ project.projectManager.email }}</p>
+        <p class="text-gray-600">Employment Date: {{ project.projectManager.employmentDate | date }}</p>
+      </div>
+    </div>
+  </div>
+  
+</div>

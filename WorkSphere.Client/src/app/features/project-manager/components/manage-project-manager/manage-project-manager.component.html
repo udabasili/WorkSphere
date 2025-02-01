@@ -1,0 +1,127 @@
+<div class="card flex justify-center bg-primary">
+  <div class="card flex justify-center ">
+    <p-drawer (onHide)="onClose()"
+              [(visible)]="visible" header="{{title}}"
+              position="right"
+              styleClass="!w-full md:!w-80 lg:!w-[30rem]"
+    >
+      <form #projectManagerForm="ngForm" (ngSubmit)="onFormSubmit(projectManagerForm)"
+            class="example-form w-full flex flex-col items-center">
+        <p-iftalabel class="!w-4/5 md:!w-full mb-4 relative">
+          <div class="flex items-center">
+            <input
+              #firstName="ngModel"
+              [(ngModel)]="projectManager.firstName"
+              [ngClass]="{
+            'p-invalid border-red-500':
+            (firstName.touched || firstName.dirty || projectManagerForm.submitted) &&
+            (firstName.hasError('required') || firstName.hasError('minlength'))
+    }"
+              class="w-full p-inputtext"
+              id="firstName"
+              minlength="2"
+              name="firstName"
+              pInputText
+              required
+            />
+            <label for="firstName">Firstname</label>
+            <i
+              [class.visible]="(firstName.touched || firstName.dirty || projectManagerForm.submitted) &&
+                    (firstName.hasError('required') || firstName.hasError('minlength'))"
+              [title]="firstName.hasError('required') ? 'First Name is required' : firstName.hasError('minlength') ? 'Minimum length for First Name is ' + firstName.getError('minlength').requiredLength : ''"
+              class="fas fa-exclamation-circle err text-xl ml-2 text-red-700 invisible"
+            >
+            </i>
+          </div>
+        </p-iftalabel>
+        <p-iftalabel class="!w-4/5 md:!w-full mb-4">
+          <div class="flex items-center">
+            <input
+              #lastName="ngModel"
+              [(ngModel)]="projectManager.lastName"
+              [ngClass]="{
+            'p-invalid border-red-500':
+            (lastName.touched || lastName.dirty || projectManagerForm.submitted) &&
+            (lastName.hasError('required') || lastName.hasError('minlength'))
+    }"
+              class="w-full p-inputtext"
+              id="lastName"
+              minlength="2"
+              name="lastName"
+              pInputText
+              required
+            />
+            <label for="lastName">Lastname</label>
+            <i
+              [class.visible]="(lastName.touched || lastName.dirty || projectManagerForm.submitted) &&
+                    (lastName.hasError('required') || lastName.hasError('minlength'))"
+              [title]="lastName.hasError('required') ? 'Last Name is required' : lastName.hasError('minlength') ? 'Minimum length for Last Name is ' + lastName.getError('minlength').requiredLength : ''"
+              class="fas fa-exclamation-circle err text-xl ml-2 text-red-700 invisible"
+            >
+            </i>
+          </div>
+        </p-iftalabel>
+        <p-iftalabel class="!w-4/5 md:!w-full mb-4">
+          <div class="flex items-center">
+            <input
+              #email="ngModel"
+              [(ngModel)]="projectManager.email"
+              [ngClass]="{
+            'p-invalid border-red-500':
+            (email.touched || email.dirty || projectManagerForm.submitted) &&
+            (email.hasError('required') || email.hasError('minlength'))
+    }"
+              class="w-full p-inputtext"
+              id="email"
+              minlength="2"
+              name="email"
+              pInputText
+              required
+              type="email"/>
+            <label for="email">Email</label>
+            <i
+              [class.visible]="(email.touched || email.dirty || projectManagerForm.submitted) &&
+                    (email.hasError('required') || email.hasError('minlength'))"
+              [title]="email.hasError('required') ? 'Email is required' : email.hasError('minlength') ? 'Minimum length for Email is ' + email.getError('minlength').requiredLength : ''"
+              class="fas fa-exclamation-circle err text-xl ml-2 text-red-700 invisible"
+            >
+            </i>
+          </div>
+        </p-iftalabel>
+        <p-iftalabel class="!w-4/5 md:!w-full mb-4 flex items-center">
+          <div class="flex items-center">
+            <input
+              #employmentDate="ngModel"
+              (ngModelChange)="validateDate(employmentDate)"
+              [(ngModel)]="projectManager.employmentDate"
+              [ngClass]="{
+        'p-invalid border-red-500':
+        (employmentDate.touched || employmentDate.dirty || projectManagerForm.submitted) &&
+        (employmentDate.hasError('required') || employmentDate.hasError('maxDate'))
+      }"
+              class="w-full"
+              id="employmentDate"
+              name="employmentDate"
+              pInputText
+              required
+              type="date"/>
+            <label for="employmentDate">Employment Date</label>
+            <i
+              [class.visible]="(employmentDate.touched || employmentDate.dirty || projectManagerForm.submitted) &&
+          (employmentDate.hasError('required') || employmentDate.hasError('maxDate'))"
+              [title]="employmentDate.hasError('required') ? 'Employment Date is required' : employmentDate.hasError('maxDate') ? 'Date cannot be in the future' : ''"
+              class="fas fa-exclamation-circle err text-xl ml-2 text-red-700 invisible">
+            </i>
+          </div>
+        </p-iftalabel>
+        <div class="card flex justify-center gap-4">
+          <p-button
+            [loading]="buttonLoading"
+            icon="pi pi-check"
+            label="Submit"
+            type="submit"/>
+        </div>
+      </form>
+    </p-drawer>
+  </div>
+</div>

@@ -20,17 +20,21 @@ namespace WorkSphere.Server.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<ProjectManager>>> GetProjectManagers(int pageIndex, int pageSize)
         {
-            return await _context.ProjectManagers
-                .Skip(pageIndex * pageSize)
-                .Take(pageSize)
-                .ToListAsync();
+            var projectManagers = await _context.ProjectManagers.Skip(pageIndex * pageSize).Take(pageSize).ToListAsync();
+            var totalCount = await _context.ProjectManagers.CountAsync();
+
+            return Ok(new { projectManagers, totalCount, pageIndex, pageSize });
         }
 
         // GET: api/ProjectManagers/5
         [HttpGet("{id}")]
         public async Task<ActionResult<ProjectManager>> GetProjectManager(int id)
         {
-            var projectManager = await _context.ProjectManagers.FindAsync(id);
+            var projectManager = await _context.
+                ProjectManagers
+                .Include(projectManager => projectManager.ManagedProjects)
+                .Include(projectManager => projectManager.Salary)
+                .FirstOrDefaultAsync(projectManager => projectManager.Id == id);
 
             if (projectManager == null)
             {

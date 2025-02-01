@@ -35,9 +35,11 @@ namespace WorkSphere.Model
         // Foreign key for the Project Manager
         [ForeignKey("ProjectManager")]
         public int? ProjectManagerID { get; set; }
+
         public virtual ProjectManager? ProjectManager { get; set; }
 
         // Relationship: One Project can have multiple tasks
+
         public virtual ICollection<ProjectTask>? ProjectTasks { get; set; }
 
     }

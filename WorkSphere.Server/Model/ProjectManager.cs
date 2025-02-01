@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 using WorkSphere.Model;
 
 namespace WorkSphere.Server.Model
@@ -34,7 +35,13 @@ namespace WorkSphere.Server.Model
 
         //navigation properties
         // Relationship: A ProjectManager manages multiple projects
+        [JsonIgnore]
         public virtual ICollection<Project>? ManagedProjects { get; set; }
+
+        //salary
+        [ForeignKey("Salary")]
+        public int? SalaryID { get; set; }
+        public virtual Salary? Salary { get; set; }
 
 
     }

@@ -3,7 +3,7 @@
   <app-activity [show]="isLoading"></app-activity>
   <app-section-header [home]="home" [items]="items" [title]="header"></app-section-header>
   <div
-    *ngIf="!showDetailsProject"
+    *ngIf="!showDetailsProjectManager"
     class="container bg-white shadow-md rounded-lg p-4 mt-4 overflow-x-auto ">
     <div class="flex justify-between items-center">
       <div class="flex items center">
@@ -12,7 +12,7 @@
             (click)="openDrawer()"
             class="text-white bg-primary hover:opacity-75 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center me-2 cursor-pointer"
             type="button">
-            <span>Add Project</span>
+            <span>Add Project Manager</span>
           </button>
         </div>
       </div>
@@ -22,38 +22,39 @@
         <thead class="text-xs text-gray-700 uppercase bg-gray-50 ">
         <tr>
           <th class="px-6 py-3" scope="col"> ID</th>
-          <th class="px-6 py-3" scope="col"> Name</th>
-          <th class="px-6 py-3" scope="col">Start Date</th>
-          <th class="px-6 py-3" scope="col">End Date</th>
+          <th class="px-6 py-3" scope="col">First Name</th>
+          <th class="px-6 py-3" scope="col">Last Name</th>
+          <th class="px-6 py-3" scope="col">Email</th>
           <th class="px-6 py-3" scope="col"></th>
         </tr>
         </thead>
         <tbody>
         <tr
-          *ngFor="let project of projects" class="bg-white border-b  border-gray-200">
-          <td class="px-6 py-4">{{ project.id }}</td>
-          <td class="px-6 py-4">{{ project.name }}</td>
-          <td class="px-6 py-4">{{ project.startDate | date }}</td>
-          <td class="px-6 py-4">{{ project.endDate | date }}</td>
+          *ngFor="let projectManager of projectManagers" class="bg-white border-b  border-gray-200">
+          <td class="px-6 py-4">{{ projectManager.id }}</td>
+          <td class="px-6 py-4">{{ projectManager.firstName }}</td>
+          <td class="px-6 py-4">{{ projectManager.lastName }}</td>
+          <td class="px-6 py-4">{{ projectManager.email }}</td>
           <td class="px-6 py-4 flex items-center">
             <button
-              (click)="openDrawer(project.id)"
+              (click)="openDrawer(projectManager.id)"
               class="text-white bg-primary
               hover:bg-blue-800 font-medium rounded-lg
               text-sm px-5 py-2.5 text-center inline-flex
               items-center me-2 cursor-pointer
-              my-2 md:my-0"
+              my-2 md:my-0
+"
               type="button">
               <span class="ms-2">Edit</span>
             </button>
             <button
-              (click)="confirmDelete($event, project.id)"
+              (click)="confirmDelete($event, projectManager.id)"
               class="text-white bg-red-700 hover:bg-red-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center me-2 cursor-pointer"
               type="button">
               <span class="ms-2">Delete</span>
             </button>
             <button
-              (click)="navigateToProjectDetails(project.id)"
+              (click)="handleProjectManagerSelected(projectManager)"
               class="text-white bg-green-700 hover:bg-green-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center me-2 cursor-pointer"
               type="button">
               <span class="ms-2">View</span>
@@ -61,15 +62,8 @@
           </td>
         </tr>
         </tbody>
-        <tr *ngIf="!projects.length">
-          <td class="px-6 py-4" colspan="6">
-            <div class="flex justify-center items-center">
-              <span class="text-gray-500">No projects found</span>
-            </div>
-          </td>
-        </tr>
       </table>
-      <div *ngIf="!!projects.length" class="flex flex-col items-center">
+      <div *ngIf="!!projectManagers.length" class="flex flex-col items-center">
         <span class="text-sm text-gray-700 dark:text-gray-400">
           Showing <span class="font-semibold text-gray-900 "> {{ pageIndex * pageSize + 1 }} </span>
           to <span
@@ -101,18 +95,17 @@
           </button>
         </div>
       </div>
+
     </div>
   </div>
 </section>
-<app-manage-project
-  (projectSaved)="loadProjects()"
+<app-manage-project-manager
+  (projectManagerSaved)="loadProjectManagers()"
   (visibilityChange)="handleDrawerVisibilityChange($event)"
-  *ngIf="showAddProject"
-  [projectId]="selectedProjectId"
-  [visible]="showAddProject"></app-manage-project>
-<app-project-details
-  (closeLoader)="closeLoader()"
-  *ngIf="showDetailsProject"
-  [isLoading]="isLoading"
-  [projectId]="selectedProjectId"
-></app-project-details>
+  *ngIf="showAddProjectManager"
+  [projectManagerId]="selectedProjectManagerId"
+  [visible]="showAddProjectManager"></app-manage-project-manager>
+<app-project-manager-details
+  *ngIf="showDetailsProjectManager"
+  [projectManagerId]="selectedProjectManagerId"
+></app-project-manager-details>

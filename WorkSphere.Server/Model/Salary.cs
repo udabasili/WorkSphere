@@ -29,5 +29,10 @@ namespace WorkSphere.Server.Model
 
         public virtual Employee? Employee { get; set; }
         public int? EmployeeID { get; set; }
+
+        // Relationship: One Salary is tied to one ProjectManager
+        [JsonIgnore]
+        public virtual ProjectManager? ProjectManager { get; set; }
+        public int? ProjectManagerID { get; set; }
     }
 }

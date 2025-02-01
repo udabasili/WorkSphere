@@ -31,11 +31,9 @@ export class ManageProjectComponent implements OnInit, OnDestroy {
   )
   buttonLoading: boolean = false;
   mode: string = 'add';
-
   getProjectSubscription?: Subscription
   addProjectSubscription?: Subscription
   updateProjectSubscription?: Subscription
-  deleteProjectSubscription?: Subscription
 
   constructor(
     private projectService: ProjectService,
@@ -68,9 +66,7 @@ export class ManageProjectComponent implements OnInit, OnDestroy {
     if (this.updateProjectSubscription) {
       this.updateProjectSubscription.unsubscribe()
     }
-    if (this.deleteProjectSubscription) {
-      this.deleteProjectSubscription.unsubscribe()
-    }
+
     this.projectSaved.unsubscribe();
     this.visibilityChange.unsubscribe();
     this.projectId = null;
@@ -121,22 +117,6 @@ export class ManageProjectComponent implements OnInit, OnDestroy {
         console.error(err);
       }
     });
-  }
-
-  deleteProject() {
-    if (this.projectId) {
-      this.deleteProjectSubscription = this.projectService.deleteProject(this.projectId).subscribe({
-        next: () => {
-          this.toastService.showSuccess('Project deleted successfully');
-          this.projectSaved.emit();
-          this.onClose();
-        },
-        error: (err) => {
-          console.error(err);
-          this.errorHandlerService.apiErrorHandler(err);
-        }
-      });
-    }
   }
 
   private addProject() {

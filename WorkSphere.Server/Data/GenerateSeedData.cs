@@ -1,5 +1,6 @@
 ﻿namespace WorkSphere.Server.Data;
 
+using Bogus;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -13,187 +14,60 @@ public class SeedData
 {
     private static Random _random = new Random();
 
-    // Sample first names and last names
-    private static readonly List<string> _firstNames = new List<string>
-        {
-            "John", "Jane", "Michael", "Sarah", "David", "Emma", "James", "Olivia", "Daniel", "Sophia"
-        };
-
-    private static readonly List<string> _lastNames = new List<string>
-        {
-            "Smith", "Johnson", "Brown", "Taylor", "Anderson", "Lee", "Wilson", "Davis", "Miller", "Moore"
-        };
-
-    // Predefined lists of adjectives, nouns, and industry terms
-    private static readonly List<string> _adjectives = new List<string>
-        {
-            "Innovative", "Dynamic", "Advanced", "Strategic", "Global", "NextGen", "Optimized", "Efficient", "Revolutionary", "Smart"
-        };
-
-    private static readonly List<string> _nouns = new List<string>
-        {
-            "Platform", "Solution", "Network", "System", "Engine", "Application", "Service", "Framework", "Module", "Interface"
-        };
-
-    private static readonly List<string> _industries = new List<string>
-        {
-            "Tech", "Finance", "Health", "Logistics", "Marketing", "AI", "Cloud", "Blockchain", "Ecommerce", "Cybersecurity"
-        };
+    private static Faker _faker = new Faker();
 
     // Method to generate a random project name
     private static string GenerateProjectName()
     {
-        // Randomly select an adjective, noun, and industry term
-        var adjective = _adjectives[_random.Next(_adjectives.Count)];
-        var noun = _nouns[_random.Next(_nouns.Count)];
-        var industry = _industries[_random.Next(_industries.Count)];
-
-        // Combine them to form a project name (e.g., "Innovative Blockchain Solution")
-        return $"{adjective} {industry} {noun}";
+        return $"{_faker.Company.CatchPhrase()}";
     }
 
-    // Generate random first and last name
-    private static string GenerateFullName()
-    {
-        var firstName = _firstNames[_random.Next(_firstNames.Count)];
-        var lastName = _lastNames[_random.Next(_lastNames.Count)];
-        return $"{firstName} {lastName}";
-    }
-
-    public static class TaskNameGenerator
-    {
-        private static Random _random = new Random();
-
-        // Predefined lists of action verbs, objectives, and contexts
-        private static readonly List<string> _actionVerbs = new List<string>
-        {
-            "Design", "Develop", "Test", "Review", "Implement", "Analyze", "Optimize", "Configure", "Document", "Deploy"
-        };
-
-        private static readonly List<string> _objectives = new List<string>
-        {
-            "User Interface", "Backend System", "Database Schema", "API Integration", "Performance Metrics",
-            "Bug Fixes", "Security Protocols", "Feature Updates", "Codebase", "System Architecture"
-        };
-
-        private static readonly List<string> _contexts = new List<string>
-        {
-            "for Client Dashboard", "for Mobile App", "for Reporting Module", "for Data Processing",
-            "for Authentication System", "for Project Management", "for Billing System",
-            "for Analytics Dashboard", "for File Storage", "for Cloud Deployment"
-        };
-
-        // Method to generate a random task name
-        public static string GenerateTaskName()
-        {
-            // Randomly select an action verb, objective, and context
-            var actionVerb = _actionVerbs[_random.Next(_actionVerbs.Count)];
-            var objective = _objectives[_random.Next(_objectives.Count)];
-            var context = _contexts[_random.Next(_contexts.Count)];
-
-            // Combine them to form a task name (e.g., "Develop API Integration for Mobile App")
-            return $"{actionVerb} {objective} {context}";
-
-
-        }
-    }
-
-
-
-    // Generate a list of employees
     public static List<Employee> GetEmployees(int count = 30)
     {
-        var employees = new List<Employee>();
-
-        for (int i = 0; i < count; i++)
-        {
-            var fullName = GenerateFullName();
-            employees.Add(new Employee
-            {
-                FirstName = fullName.Split(' ')[0],
-                LastName = fullName.Split(' ')[1],
-                Email = $"{fullName.Split(' ')[0].ToLower()}.{fullName.Split(' ')[1].ToLower()}@example.com",
-                EmploymentDate = DateTime.Now.AddDays(-_random.Next(365, 1825)), // Random employment date within the last 5 years
-            });
-        }
-
-        return employees;
+        return new Faker<Employee>()
+            .RuleFor(e => e.FirstName, f => f.Name.FirstName())
+            .RuleFor(e => e.LastName, f => f.Name.LastName())
+            .RuleFor(e => e.Email, (f, e) => $"{e.FirstName.ToLower()}.{e.LastName.ToLower()}@example.com")
+            .RuleFor(e => e.EmploymentDate, f => f.Date.Past(5))
+            .Generate(count);
     }
 
-    // Generate a list of projects
     public static List<Project> GetProjects(int count = 30)
     {
-        var projects = new List<Project>();
-
-        for (int i = 0; i < count; i++)
-        {
-            projects.Add(new Project
-            {
-                Name = GenerateProjectName(),
-                Description = $"Description of Project {i + 1}",
-                StartDate = DateTime.Now.AddDays(-_random.Next(1, 200)),
-                EndDate = DateTime.Now.AddDays(_random.Next(200, 400)),
-            });
-        }
-
-        return projects;
+        return new Faker<Project>()
+            .RuleFor(p => p.Name, f => GenerateProjectName())
+            .RuleFor(p => p.Description, f => f.Lorem.Sentence())
+            .RuleFor(p => p.StartDate, f => f.Date.Past(1))
+            .RuleFor(p => p.EndDate, f => f.Date.Future(1))
+            .Generate(count);
     }
 
-    // Generate a list of project managers
     public static List<ProjectManager> GetProjectManagers(int count = 30)
     {
-        var projectManagers = new List<ProjectManager>();
-
-        for (int i = 0; i < count; i++)
-        {
-            var fullName = GenerateFullName();
-            projectManagers.Add(new ProjectManager
-            {
-                FirstName = fullName.Split(' ')[0],
-                LastName = fullName.Split(' ')[1],
-                Email = $"{fullName.Split(' ')[0].ToLower()}.{fullName.Split(' ')[1].ToLower()}@example.com",
-                EmploymentDate = DateTime.Now.AddDays(-_random.Next(365, 1825)), // Random employment date within the last 5 years
-            });
-        }
-
-        return projectManagers;
+        return new Faker<ProjectManager>()
+            .RuleFor(pm => pm.FirstName, f => f.Name.FirstName())
+            .RuleFor(pm => pm.LastName, f => f.Name.LastName())
+            .RuleFor(pm => pm.Email, (f, pm) => $"{pm.FirstName.ToLower()}.{pm.LastName.ToLower()}@example.com")
+            .RuleFor(pm => pm.EmploymentDate, f => f.Date.Past(5))
+            .Generate(count);
     }
 
-    // Generate a list of tasks
     public static List<ProjectTask> GetTasks(int count = 15)
     {
-        var tasks = new List<ProjectTask>();
-
-        for (int i = 0; i < count; i++)
-        {
-            tasks.Add(new ProjectTask
-            {
-                Name = TaskNameGenerator.GenerateTaskName(),
-                Description = $"Description of Task {i + 1}",
-                Status = (Status)_random.Next(3), // Random status
-
-            });
-        }
-
-        return tasks;
+        return new Faker<ProjectTask>()
+            .RuleFor(t => t.Name, f => f.Hacker.Verb() + " " + f.Hacker.Noun())
+            .RuleFor(t => t.Description, f => f.Lorem.Sentence())
+            .RuleFor(t => t.Status, f => f.PickRandom<Status>())
+            .Generate(count);
     }
 
-    // Generate a list of salaries
-    public static List<Salary> GetSalaries(int count = 30)
+    public static List<Salary> GetSalaries(int count = 60)
     {
-        var salaries = new List<Salary>();
-
-        for (int i = 0; i < count; i++)
-        {
-            salaries.Add(new Salary
-            {
-                BasicSalary = _random.Next(30000, 100000), // Random basic salary between 30k and 100k
-                Bonus = _random.Next(1000, 5000), // Random bonus between 1k and 5k
-                Deductions = _random.Next(500, 2000), // Random deductions between 500 and 2k
-            });
-        }
-
-        return salaries;
+        return new Faker<Salary>()
+            .RuleFor(s => s.BasicSalary, f => f.Random.Int(30000, 100000))
+            .RuleFor(s => s.Bonus, f => f.Random.Int(1000, 5000))
+            .RuleFor(s => s.Deductions, f => f.Random.Int(500, 2000))
+            .Generate(count);
     }
 
     public static async Task SeedAdminAsync(UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager)
@@ -316,6 +190,37 @@ public class SeedData
         await context.SaveChangesAsync();
     }
 
+    public static async Task SeedProjectManagerSalaryAsyc(WorkSphereDbContext context)
+    {
+        var projectManagers = context.ProjectManagers.ToList();
+
+        // Assign salaries to project managers
+        var salaries = await context.Salaries.ToListAsync();
+        var salariesWithoutEmployee = salaries.Where(s => s.EmployeeID == 0 || s.EmployeeID == null).ToList();
+
+        for (int i = 0; i < projectManagers.Count; i++)
+        {
+            projectManagers[i].SalaryID = salariesWithoutEmployee[i].Id;
+        }
+        await context.SaveChangesAsync();
+        //set the project manager id to the salary
+        //get salaries without employee id
+        foreach (var salary in salariesWithoutEmployee)
+        {
+            var projectManager = projectManagers.Where(e => e.SalaryID == salary.Id).FirstOrDefault();
+            if (projectManager != null)
+            {
+                salary.ProjectManagerID = projectManager.Id;
+            }
+            else
+            {
+                // Handle the case where no matching ProjectManager is found
+                // For example, log a warning or throw an exception
+            }
+        }
+
+        await context.SaveChangesAsync();
+    }
 
     public static async Task SeedSalaryAsync(WorkSphereDbContext context)
     {
@@ -337,7 +242,11 @@ public class SeedData
             //set the employee id to the salary
             foreach (var salary in salaries)
             {
-                salary.EmployeeID = employees.Where(e => e.SalaryID == salary.Id).FirstOrDefault().Id;
+                var employee = employees.Where(e => e.SalaryID == salary.Id).FirstOrDefault();
+                if (employee != null)
+                {
+                    salary.EmployeeID = employee.Id;
+                }
             }
 
 
@@ -425,6 +334,7 @@ public class SeedData
 
         await SeedTaskAsync(context);
         await SeedSalaryAsync(context);
+        //await SeedProjectManagerSalaryAsyc(context);
     }
 
 }

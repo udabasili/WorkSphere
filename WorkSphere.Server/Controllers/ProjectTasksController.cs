@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using WorkSphere.Data;
 using WorkSphere.Server.Model;
@@ -21,12 +16,19 @@ namespace WorkSphere.Server.Controllers
             _context = context;
         }
 
-        // GET: api/ProjectTasks
+        // GET: api/ProjectTasks?projectID
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<ProjectTask>>> GetProjectTasks()
+        public async Task<ActionResult<IEnumerable<ProjectTask>>> GetProjectTasks(int projectID)
         {
-            return await _context.ProjectTasks.ToListAsync();
+            var projectTasks = await _context.ProjectTasks.
+                Where(projectTask => projectTask.ProjectID == projectID)
+                .ToListAsync();
+            var projectTeamMembers = await _context.Employees
+                .Where(employee => projectTasks.Select(projectTask => projectTask.EmployeeID).Contains(employee.Id))
+                .ToListAsync();
+            return Ok(new { projectTasks, projectTeamMembers });
         }
+
 
         // GET: api/ProjectTasks/5
         [HttpGet("{id}")]

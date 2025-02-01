@@ -333,7 +333,14 @@ namespace WorkSphere.Server.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
+                    b.Property<int?>("SalaryID")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("SalaryID")
+                        .IsUnique()
+                        .HasFilter("[SalaryID] IS NOT NULL");
 
                     b.ToTable("ProjectManagers");
                 });
@@ -395,6 +402,9 @@ namespace WorkSphere.Server.Migrations
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<int?>("EmployeeID")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("ProjectManagerID")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
@@ -496,6 +506,15 @@ namespace WorkSphere.Server.Migrations
                     b.Navigation("Salary");
                 });
 
+            modelBuilder.Entity("WorkSphere.Server.Model.ProjectManager", b =>
+                {
+                    b.HasOne("WorkSphere.Server.Model.Salary", "Salary")
+                        .WithOne("ProjectManager")
+                        .HasForeignKey("WorkSphere.Server.Model.ProjectManager", "SalaryID");
+
+                    b.Navigation("Salary");
+                });
+
             modelBuilder.Entity("WorkSphere.Server.Model.ProjectTask", b =>
                 {
                     b.HasOne("WorkSphere.Server.Model.Employee", "Employee")
@@ -551,6 +570,8 @@ namespace WorkSphere.Server.Migrations
             modelBuilder.Entity("WorkSphere.Server.Model.Salary", b =>
                 {
                     b.Navigation("Employee");
+
+                    b.Navigation("ProjectManager");
                 });
 #pragma warning restore 612, 618
         }

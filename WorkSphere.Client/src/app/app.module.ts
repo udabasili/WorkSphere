@@ -40,6 +40,17 @@ import {ConfirmDialogModule} from 'primeng/confirmdialog';
 import {ProjectsComponent} from './features/project/components/projects/projects.component';
 import {ProjectDetailsComponent} from './features/project/components/project-details/project-details.component';
 import {ManageProjectComponent} from './features/project/components/manage-project/manage-project.component';
+import {
+  ProjectManagersComponent
+} from './features/project-manager/components/project-managers/project-managers.component';
+import {
+  ManageProjectManagerComponent
+} from './features/project-manager/components/manage-project-manager/manage-project-manager.component';
+import {
+  ProjectManagerDetailsComponent
+} from './features/project-manager/components/project-manager-details/project-manager-details.component';
+import {TasksComponent} from './features/task/components/tasks/tasks.component';
+import {DropdownModule} from 'primeng/dropdown';
 
 
 @NgModule({
@@ -56,6 +67,10 @@ import {ManageProjectComponent} from './features/project/components/manage-proje
     ProjectsComponent,
     ProjectDetailsComponent,
     ManageProjectComponent,
+    ProjectManagersComponent,
+    ManageProjectManagerComponent,
+    ProjectManagerDetailsComponent,
+    TasksComponent,
 
   ],
   imports: [
@@ -82,6 +97,7 @@ import {ManageProjectComponent} from './features/project/components/manage-proje
     InputText,
     FormsModule,
     Breadcrumb,
+    DropdownModule,
     BrowserAnimationsModule,  // Required for Toastr
     ToastrModule.forRoot({
       positionClass: 'toast-top-center',

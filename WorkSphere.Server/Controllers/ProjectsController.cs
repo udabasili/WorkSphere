@@ -30,7 +30,11 @@ namespace WorkSphere.Server.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<Project>> GetProject(int id)
         {
-            var project = await _context.Projects.FirstOrDefaultAsync(project => project.Id == id);
+            var project = await _context
+                .Projects.
+                Include(project => project.ProjectManager).
+                Include(project => project.ProjectTasks).
+                FirstOrDefaultAsync(project => project.Id == id);
 
 
             if (project == null)

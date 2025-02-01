@@ -3,6 +3,10 @@ import {RouterModule, Routes} from '@angular/router';
 import {DashboardComponent} from './features/dashboard/components/dashboard.component';
 import {EmployeesComponent} from './features/employees/components/employees/employees.component';
 import {ProjectsComponent} from './features/project/components/projects/projects.component';
+import {
+  ProjectManagersComponent
+} from './features/project-manager/components/project-managers/project-managers.component';
+import {TasksComponent} from './features/task/components/tasks/tasks.component';
 
 const routes: Routes = [
   {
@@ -23,6 +27,20 @@ const routes: Routes = [
   {
     path: 'projects/:id',
     component: ProjectsComponent
+  },
+  //Project Managers route
+  {
+    path: 'project-managers',
+    component: ProjectManagersComponent
+  },
+  {
+    path: 'project-managers/:id',
+    component: ProjectManagersComponent
+  },
+  //Tasks route
+  {
+    path: 'tasks',
+    component: TasksComponent
   }
 
 ];

@@ -74,6 +74,11 @@ export class ErrorHandlerService {
       });
       return;
     }
+    //not allowed 405 error
+    if (err.status === 405) {
+      this.toastService.showError('Method not allowed');
+      return;
+    }
 
     if (error.message) {
       this.toastService.showError(error.message);

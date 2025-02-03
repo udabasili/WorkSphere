@@ -27,29 +27,28 @@
  *     }
  * }
  */
-import {Employee} from '../../employees/model/employee';
-import {Project} from '../../project/models/project';
+
+//status: Active, Inactive, Completed
+export type Status = 'Active' | 'Inactive' | 'Completed';
 
 export class Task {
   id: number;
   name: string;
   description: string;
   order: number;
-  status: string;
+  status: Status | number;
   employeeID: number;
-  employee: Employee;
   projectID: number;
-  project: Project
+  numOfTeamMembers: number;
 
-  constructor(id: number, name: string, description: string, order: number, status: string, employeeID: number, employee: Employee, projectID: number, project: Project) {
+  constructor(id: number, name: string, description: string, order: number, status: Status, employeeID: number, projectID: number, numOfTeamMembers: number) {
     this.id = id;
     this.name = name;
     this.description = description;
     this.order = order;
     this.status = status;
     this.employeeID = employeeID;
-    this.employee = employee;
     this.projectID = projectID;
-    this.project = project;
+    this.numOfTeamMembers = numOfTeamMembers;
   }
 }

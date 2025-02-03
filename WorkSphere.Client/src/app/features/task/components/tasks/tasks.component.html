@@ -33,26 +33,83 @@
     </div>
 
   </div>
-  <div *ngIf="tasks.length > 0" class="mt-6 w-full">
+  <div *ngIf="selectedProjectConfirmed" class="mt-6 w-full">
     <div class="flex justify-between items-center">
-        <span>
+        <span class="text-2xl font-semibold">
           Drag and drop to re-order tasks and click submit to save changes.
         </span>
-      <p-button class="mt-2" icon="pi pi-check" label="Submit" severity="success"></p-button>
+      <p-button
+        (click)="handleTaskSubmit()"
+        [loading]="buttonLoading"
+        class="mt-2"
+        icon="pi pi-check"
+        label="Confirm Task"
+        severity="success"></p-button>
     </div>
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-4  w-full">
-
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-4 w-full">
       <div class="p-4">
-        <div class="flex justify-between items-center">
-          <span class="text-lg font-semibold">To-Do List (24)</span>
-          <!-- add icon button only -->
-          <i class="fa fa-plus"></i>
+        <div class="flex justify-between items-center mb-2">
+          <span class="text-2xl font-semibold">Not Started</span>
+          <i class="fa fa-plus cursor-pointer"></i>
+        </div>
+        <div
+          #notStartedList="cdkDropList"
+          (cdkDropListDropped)="drop($event)"
+          [cdkDropListConnectedTo]="[inProgressList, doneList]"
+          [cdkDropListData]="inactiveTasks"
+          cdkDropList
+          class="example-list border-2 border-transparent min-h-1/2">
+          @for (item of inactiveTasks; track item) {
+            <div class="bg-white shadow-lg rounded-lg p-4 mb-5 cursor-move "
+                 cdkDrag>
+              <div class="font-bold text-lg">{{ item.name | titlecase }}</div>
+              <p class="text-gray-600 text-sm">{{ item.description }}</p>
+            </div>
+          }
         </div>
       </div>
-      <div class="bg-white shadow-md rounded-lg p-4">Column 2</div>
-      <div class="bg-white shadow-md rounded-lg p-4">Column 3</div>
-    </div>
 
+      <div class="p-4">
+        <div class="flex justify-between items-center mb-2">
+          <span class="text-2xl font-semibold">In Progress</span>
+        </div>
+        <div
+          #inProgressList="cdkDropList"
+          (cdkDropListDropped)="drop($event)"
+          [cdkDropListConnectedTo]="[notStartedList, doneList]"
+          [cdkDropListData]="activeTasks"
+          cdkDropList
+          class="example-list border-2 border-transparent  min-h-1/2  ">
+          @for (item of activeTasks; track item) {
+            <div class="bg-white shadow-lg rounded-lg p-4 mb-5 cursor-move " cdkDrag>
+              <div class="font-bold text-lg">{{ item.name |  titlecase }}</div>
+              <p class="text-gray-600 text-sm">{{ item.description }}</p>
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Done Column -->
+      <div class="p-4">
+        <div class="flex justify-between items-center mb-2">
+          <span class="text-2xl font-semibold">Done</span>
+        </div>
+        <div
+          #doneList="cdkDropList"
+          (cdkDropListDropped)="drop($event)"
+          [cdkDropListConnectedTo]="[notStartedList, inProgressList]"
+          [cdkDropListData]="completedTasks"
+          cdkDropList
+          class="example-list border-2 border-transparent min-h-1/2">
+          @for (item of completedTasks; track item) {
+            <div class="bg-white shadow-lg rounded-lg p-4 mb-5 cursor-move " cdkDrag>
+              <div class="font-bold text-lg">{{ item.name | titlecase }}</div>
+              <p class="text-gray-600 text-sm">{{ item.description }}</p>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
   </div>
 </section>
 

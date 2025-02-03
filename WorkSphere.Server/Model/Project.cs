@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 using WorkSphere.Server.Model;
 
 namespace WorkSphere.Model
@@ -28,6 +29,7 @@ namespace WorkSphere.Model
         [Required(ErrorMessage = "End date is required")]
         [DataType(DataType.Date)]
         public DateTime EndDate { get; set; }
+        [JsonConverter(typeof(JsonStringEnumConverter))]
 
         public Status Status { get; set; }
 

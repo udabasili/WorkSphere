@@ -51,6 +51,7 @@ import {
 } from './features/project-manager/components/project-manager-details/project-manager-details.component';
 import {TasksComponent} from './features/task/components/tasks/tasks.component';
 import {DropdownModule} from 'primeng/dropdown';
+import {CdkDrag, CdkDropList} from '@angular/cdk/drag-drop';
 
 
 @NgModule({
@@ -105,6 +106,8 @@ import {DropdownModule} from 'primeng/dropdown';
       preventDuplicates: true,
     }),
     ConfirmDialogModule,
+    CdkDropList,
+    CdkDrag
 
   ],
   providers: [

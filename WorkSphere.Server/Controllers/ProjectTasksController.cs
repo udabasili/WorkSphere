@@ -1,7 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using WorkSphere.Data;
+using Microsoft.CodeAnalysis;
+using Newtonsoft.Json;
+using WorkSphere.Model;
+using WorkSphere.Server.Dtos;
 using WorkSphere.Server.Model;
+using WorkSphere.Server.Services;
 
 namespace WorkSphere.Server.Controllers
 {
@@ -9,102 +12,126 @@ namespace WorkSphere.Server.Controllers
     [ApiController]
     public class ProjectTasksController : ControllerBase
     {
-        private readonly WorkSphereDbContext _context;
+        private readonly IProjectTaskService _service;
+        private readonly ILogger<ProjectTasksController> _logger;
 
-        public ProjectTasksController(WorkSphereDbContext context)
+        public ProjectTasksController(IProjectTaskService service, ILogger<ProjectTasksController> logger)
         {
-            _context = context;
+            _service = service;
+            _logger = logger;
+
         }
 
         // GET: api/ProjectTasks?projectID
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<ProjectTask>>> GetProjectTasks(int projectID)
+        public async Task<ActionResult<IEnumerable<object>>> GetProjectTasks(int projectID)
         {
-            var projectTasks = await _context.ProjectTasks.
-                Where(projectTask => projectTask.ProjectID == projectID)
-                .ToListAsync();
-            var projectTeamMembers = await _context.Employees
-                .Where(employee => projectTasks.Select(projectTask => projectTask.EmployeeID).Contains(employee.Id))
-                .ToListAsync();
-            return Ok(new { projectTasks, projectTeamMembers });
+            var response = await _service.GetProjectTasksAsync(projectID);
+            if (response == null || !response.ProjectTasks.Any())
+                return NotFound("No tasks found for this project.");
+
+            return Ok(response);
         }
 
 
-        // GET: api/ProjectTasks/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<ProjectTask>> GetProjectTask(int id)
-        {
-            var projectTask = await _context.ProjectTasks.FindAsync(id);
 
-            if (projectTask == null)
-            {
-                return NotFound();
-            }
+        //// GET: api/ProjectTasks/5
+        //[HttpGet("{id}")]
+        //public async Task<ActionResult<ProjectTask>> GetProjectTask(int id)
+        //{
+        //    var projectTask = await _context.ProjectTasks.FindAsync(id);
 
-            return projectTask;
-        }
+        //    if (projectTask == null)
+        //    {
+        //        return NotFound();
+        //    }
 
-        // PUT: api/ProjectTasks/5
+        //    return projectTask;
+        //}
+
+        // PUT: api/ProjectTasks
+        //the input is an array of project tasks
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutProjectTask(int id, ProjectTask projectTask)
-        {
-            if (id != projectTask.Id)
-            {
-                return BadRequest();
-            }
 
-            _context.Entry(projectTask).State = EntityState.Modified;
+        [HttpPut]
+        public async Task<IActionResult> PutProjectTask(int projectID, [FromBody] UpdateProjectTasksDto updateDto)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
 
             try
             {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!ProjectTaskExists(id))
+                // ✅ Use ILogger for logging
+                _logger.LogInformation("Received request to update project tasks for ProjectID: {ProjectID}", projectID);
+                _logger.LogInformation("Tasks: {Tasks}", JsonConvert.SerializeObject(updateDto.Tasks));
+
+                var projectTaskBulkInsertDto = new ProjectTaskBulkInsertDto
                 {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
+                    ProjectId = projectID,
+                    Tasks = updateDto.Tasks.Select(task => new ProjectTask
+                    {
+                        Id = task.Id,
+                        Name = task.Name,
+                        Description = task.Description,
+                        ProjectID = task.ProjectID,
+                        EmployeeID = task.EmployeeID,
+                        Order = task.Order,
+                        Status = Enum.Parse<Status>(task.Status) // Might throw an error
+                    }).ToList()
+                };
+
+
+                var response = await _service.BulkUpdateProjectTasks(projectTaskBulkInsertDto);
+
+                return Ok(response);
             }
-
-            return NoContent();
-        }
-
-        // POST: api/ProjectTasks
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPost]
-        public async Task<ActionResult<ProjectTask>> PostProjectTask(ProjectTask projectTask)
-        {
-            _context.ProjectTasks.Add(projectTask);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetProjectTask", new { id = projectTask.Id }, projectTask);
-        }
-
-        // DELETE: api/ProjectTasks/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteProjectTask(int id)
-        {
-            var projectTask = await _context.ProjectTasks.FindAsync(id);
-            if (projectTask == null)
+            catch (Exception ex)
             {
-                return NotFound();
+                _logger.LogError(ex, "Error updating project tasks for ProjectID: {ProjectID}", projectID);
+
+                // ✅ Log inner exception details
+                if (ex.InnerException != null)
+                {
+                    _logger.LogError("Inner Exception: {InnerException}", ex.InnerException.Message);
+                }
+
+                return StatusCode(500, new { message = "An error occurred while updating the project tasks.", error = ex.Message });
             }
-
-            _context.ProjectTasks.Remove(projectTask);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
         }
 
-        private bool ProjectTaskExists(int id)
-        {
-            return _context.ProjectTasks.Any(e => e.Id == id);
-        }
+
+        //// POST: api/ProjectTasks
+        //// To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        //[HttpPost]
+        //public async Task<ActionResult<ProjectTask>> PostProjectTask(ProjectTask projectTask)
+        //{
+        //    _context.ProjectTasks.Add(projectTask);
+        //    await _context.SaveChangesAsync();
+
+        //    return CreatedAtAction("GetProjectTask", new { id = projectTask.Id }, projectTask);
+        //}
+
+        //// DELETE: api/ProjectTasks/5
+        //[HttpDelete("{id}")]
+        //public async Task<IActionResult> DeleteProjectTask(int id)
+        //{
+        //    var projectTask = await _context.ProjectTasks.FindAsync(id);
+        //    if (projectTask == null)
+        //    {
+        //        return NotFound();
+        //    }
+
+        //    _context.ProjectTasks.Remove(projectTask);
+        //    await _context.SaveChangesAsync();
+
+        //    return NoContent();
+        //}
+
+        //private bool ProjectTaskExists(int id)
+        //{
+        //    return _context.ProjectTasks.Any(e => e.Id == id);
+        //}
     }
 }

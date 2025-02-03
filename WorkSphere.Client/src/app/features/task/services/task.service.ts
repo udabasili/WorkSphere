@@ -24,4 +24,9 @@ export class TaskService {
     const apiMethod = `${API_URL}/api/ProjectTasks?projectID=${projectId}`;
     return this.httpClient.get<TasksAPIResponse>(apiMethod);
   }
+
+  updateTasks(tasks: Array<Task>, projectId: number) {
+    const apiMethod = `${API_URL}/api/ProjectTasks?projectID=${projectId}`;
+    return this.httpClient.put<void>(apiMethod, {tasks});
+  }
 }

@@ -12,6 +12,7 @@ namespace WorkSphere.Server.Model
         public string? Description { get; set; }
 
         public int? Order { get; set; }
+        [JsonConverter(typeof(JsonStringEnumConverter))]
 
         public Status Status { get; set; }
 

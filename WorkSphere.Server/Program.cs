@@ -1,9 +1,14 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
+using Serilog;
+using Serilog.Events;
 using WorkSphere.Data;
 using WorkSphere.Server.Data;
 using WorkSphere.Server.Model;
+using WorkSphere.Server.Repository;
+using WorkSphere.Server.Repository.Concrete;
+using WorkSphere.Server.Services;
 
 
 namespace WorkSphere.Server
@@ -15,6 +20,17 @@ namespace WorkSphere.Server
             var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 
             var builder = WebApplication.CreateBuilder(args);
+
+            Log.Logger = new LoggerConfiguration()
+                .MinimumLevel.Debug()
+                .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
+                .Enrich.FromLogContext()
+                .WriteTo.Console() // Fix: Add using Serilog.Sinks.Console;
+                .WriteTo.File("Logs/log-.txt", rollingInterval: RollingInterval.Day)
+                .CreateLogger();
+
+            builder.Host.UseSerilog(Log.Logger);
+
             builder.Logging.ClearProviders();
             builder.Logging.AddConsole();
 
@@ -84,7 +100,23 @@ namespace WorkSphere.Server
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
+            //Add DI  
+            // Register Repositories
+            builder.Services.AddScoped<IProjectRepo, ProjectRepo>();
+            builder.Services.AddScoped<IProjectTaskRepo, ProjectTaskRepo>();
+            builder.Services.AddScoped<IEmployeeRepo, EmployeeRepo>();
+
+            // Register Services
+            builder.Services.AddScoped<IProjectService, ProjectService>();
+            builder.Services.AddScoped<IProjectTaskService, ProjectTaskService>();
+            builder.Services.AddScoped<IEmployeeService, EmployeeService>();
+
+            // Register AutoMapper
+            builder.Services.AddAutoMapper(typeof(MappingProfile));
+
             var app = builder.Build();
+
+            app.UseSerilogRequestLogging();
 
             // Seed DB
             using (var scope = app.Services.CreateScope())
@@ -121,6 +153,8 @@ namespace WorkSphere.Server
 
             app.UseHttpsRedirection();
             app.UseCors(MyAllowSpecificOrigins);
+
+
 
 
             app.UseAuthorization();

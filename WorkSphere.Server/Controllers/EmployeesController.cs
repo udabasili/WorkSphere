@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using WorkSphere.Data;
 using WorkSphere.Server.Model;
+using WorkSphere.Server.Services;
 
 namespace WorkSphere.Server.Controllers
 {
@@ -9,13 +8,13 @@ namespace WorkSphere.Server.Controllers
     [ApiController]
     public class EmployeesController : ControllerBase
     {
-        private readonly WorkSphereDbContext _context;
+        private readonly EmployeeService _employeeService;
         private readonly ILogger _logger;
 
 
-        public EmployeesController(WorkSphereDbContext context, ILogger<EmployeesController> logger)
+        public EmployeesController(EmployeeService employeeService, ILogger<EmployeesController> logger)
         {
-            _context = context;
+            _employeeService = employeeService;
             _logger = logger;
 
         }
@@ -24,19 +23,17 @@ namespace WorkSphere.Server.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Employee>>> GetEmployees(int pageIndex, int pageSize)
         {
-            /**
-             * Response Object
-             * {
-                    employees: Employee[],
-                    pageIndex: number,
-                    pageSize: number,
-                    totalCount: number
-                  }
-             * **/
-            var employees = await _context.Employees.Skip(pageIndex * pageSize).Take(pageSize).ToListAsync();
-            var totalCount = await _context.Employees.CountAsync();
 
-            return Ok(new { employees, totalCount, pageIndex, pageSize });
+            try
+            {
+                var employees = await _employeeService.PagedEmployeeResponseDto(pageIndex, pageSize);
+                return Ok(employees);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting employees");
+                return StatusCode(500, ex.Message);
+            }
         }
 
 
@@ -44,17 +41,45 @@ namespace WorkSphere.Server.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<Employee>> GetEmployee(int id)
         {
-            var employee = await _context.Employees
-                .Include(employee => employee.Salary)
-                .FirstOrDefaultAsync(employee => employee.Id == id);
-
-            if (employee == null)
+            try
             {
-                return NotFound();
+                if (id <= 0 | id == null)
+                {
+                    return BadRequest(new
+                    {
+                        type = "https://tools.ietf.org/html/rfc7231#section-6.5.1",
+                        title = "Bad Request",
+                        status = 400,
+                        detail = "ID must be greater than 0",
+                        traceId = HttpContext.TraceIdentifier
+                    });
+                }
+                var employee = await _employeeService.GetEmployee(id);
+                if (employee == null)
+                {
+                    return NotFound(new
+                    {
+                        type = "https://tools.ietf.org/html/rfc7231#section-6.5.4",
+                        title = "Not Found",
+                        status = 404,
+                        detail = $"Employee with ID {id} not found.",
+                        traceId = HttpContext.TraceIdentifier
+                    });
+                }
+                return employee;
             }
-
-
-            return employee;
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting employee");
+                return StatusCode(500, new
+                {
+                    type = "https://tools.ietf.org/html/rfc7231#section-6.6.1",
+                    title = "Internal Server Error",
+                    status = 500,
+                    detail = ex.Message,
+                    traceId = HttpContext.TraceIdentifier
+                });
+            }
         }
 
         // PUT: api/Employees/5
@@ -62,35 +87,39 @@ namespace WorkSphere.Server.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> PutEmployee(int id, Employee employee)
         {
+
             if (id != employee.Id)
             {
                 return BadRequest();
             }
-
-            _context.Entry(employee).State = EntityState.Modified;
-
             try
             {
-                await _context.SaveChangesAsync();
+                var updatedEmployee = await _employeeService.UpdateEmployee(id, employee);
+                if (updatedEmployee == null)
+                {
+                    return NotFound(new
+                    {
+                        type = "https://tools.ietf.org/html/rfc7231#section-6.5.4",
+                        title = "Not Found",
+                        status = 404,
+                        detail = $"Employee with ID {id} not found.",
+                        traceId = HttpContext.TraceIdentifier
+                    });
+                }
+                return Ok(updatedEmployee);
             }
-            catch (DbUpdateConcurrencyException)
+            catch (Exception ex)
             {
-                if (!EmployeeExists(id))
+                _logger.LogError(ex, "Error updating employee");
+                return StatusCode(500, new
                 {
-                    return NotFound();
-                }
-                if (EmployeeEmailExists(employee.Email))
-                {
-                    return BadRequest("Email already exists");
-                }
-
-                else
-                {
-                    throw;
-                }
+                    type = "https://tools.ietf.org/html/rfc7231#section-6.6.1",
+                    title = "Internal Server Error",
+                    status = 500,
+                    detail = ex.Message,
+                    traceId = HttpContext.TraceIdentifier
+                });
             }
-
-            return NoContent();
         }
 
         // POST: api/Employees
@@ -98,47 +127,61 @@ namespace WorkSphere.Server.Controllers
         [HttpPost]
         public async Task<ActionResult<Employee>> PostEmployee([FromBody] Employee employee)
         {
-            if (employee == null)
+
+            try
             {
-                return BadRequest("Invalid employee data");
-            }
 
-            if (EmployeeEmailExists(employee.Email))
+                var newEmployee = await _employeeService.AddEmployee(employee);
+                return CreatedAtAction("GetEmployee", new { id = newEmployee.Id }, newEmployee);
+            }
+            catch (Exception ex)
             {
-                return BadRequest("Email already exists");
+                _logger.LogError(ex, "Error adding employee");
+                return StatusCode(500, new
+                {
+                    type = "https://tools.ietf.org/html/rfc7231#section-6.6.1",
+                    title = "Internal Server Error",
+                    status = 500,
+                    detail = ex.Message,
+                    traceId = HttpContext.TraceIdentifier
+                });
             }
-
-            _context.Employees.Add(employee);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetEmployee", new { id = employee.Id }, employee);
         }
 
         // DELETE: api/Employees/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteEmployee(int id)
         {
-            var employee = await _context.Employees.FindAsync(id);
-            if (employee == null)
+
+            try
             {
-                return NotFound();
+                var employee = await _employeeService.DeleteEmployee(id);
+                if (employee == null)
+                {
+                    return NotFound(new
+                    {
+                        type = "https://tools.ietf.org/html/rfc7231#section-6.5.4",
+                        title = "Not Found",
+                        status = 404,
+                        detail = $"Employee with ID {id} not found.",
+                        traceId = HttpContext.TraceIdentifier
+                    });
+                }
+                return Ok(employee);
             }
-
-            _context.Employees.Remove(employee);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error deleting employee");
+                return StatusCode(500, new
+                {
+                    type = "https://tools.ietf.org/html/rfc7231#section-6.6.1",
+                    title = "Internal Server Error",
+                    status = 500,
+                    detail = ex.Message,
+                    traceId = HttpContext.TraceIdentifier
+                });
+            }
         }
 
-        private bool EmployeeExists(int id)
-        {
-            return _context.Employees.Any(e => e.Id == id);
-        }
-
-        //check if employee email exists
-        private bool EmployeeEmailExists(string email)
-        {
-            return _context.Employees.Any(e => e.Email == email);
-        }
     }
 }

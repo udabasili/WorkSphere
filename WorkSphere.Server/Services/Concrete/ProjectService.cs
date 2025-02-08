@@ -24,25 +24,25 @@ namespace WorkSphere.Server.Services
         }
 
 
-        public async Task<Project> GetProject(int projectId)
+        public async Task<Project> GetProjectAsync(int projectId)
         {
-            return _projectRepo.GetProject(projectId);
+            return await _projectRepo.GetProjectAsync(projectId);
         }
 
-        public Project CreateProject(Project project)
+        public async Task<Project> CreateProjectAsync(Project project)
         {
-            return _projectRepo.CreateProject(project);
+            return await _projectRepo.CreateProjectAsync(project);
         }
 
-        public void DeleteProject(int projectId)
+        public async Task<Project> UpdateProjectAsync(int id, Project project)
         {
-
-            _projectRepo.DeleteProject(projectId);
+            return await _projectRepo.UpdateProjectAsync(id, project);
         }
 
-        public Project UpdateProject(int id, Project project)
+        public async void DeleteProjectAsync(int projectId)
         {
-            return _projectRepo.UpdateProject(id, project);
+
+            _projectRepo.DeleteProjectAsync(projectId);
         }
 
 

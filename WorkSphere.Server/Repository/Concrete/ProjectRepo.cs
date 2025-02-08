@@ -33,11 +33,14 @@ namespace WorkSphere.Server.Repository.Concrete
                 .Take(pageSize)
                 .ToListAsync();
 
+            var totalProjects = await GetTotalProjectCountAsync();
+
             return new PagedProjectsResponseDto
             {
                 Projects = projects,
                 PageIndex = pageIndex,
-                PageSize = pageSize
+                PageSize = pageSize,
+                TotalCount = totalProjects
             };
         }
 
@@ -46,46 +49,49 @@ namespace WorkSphere.Server.Repository.Concrete
             return await _context.Projects.CountAsync();
         }
 
-        public Project GetProject(int projectId)
+        public async Task<Project> GetProjectAsync(int projectId)
         {
-            return _context.Projects
+            if (projectId == 0)
+            {
+                return null;
+            }
+            return await _context.Projects
                 .Include(project => project.ProjectManager)
                 .Include(project => project.ProjectTasks)
-                .FirstOrDefault(project => project.Id == projectId);
+                .FirstOrDefaultAsync(project => project.Id == projectId);
         }
 
-        public Project CreateProject(Project project)
+        public async Task<Project> CreateProjectAsync(Project project)
         {
             _context.Projects.Add(project);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
             return project;
         }
 
-        public void DeleteProject(int projectId)
+        public async void DeleteProjectAsync(int projectId)
         {
 
-            var project = _context.Projects.FirstOrDefault(project => project.Id == projectId);
+            var project = await _context.Projects.FirstOrDefaultAsync(project => project.Id == projectId);
             if (project != null)
             {
                 _context.Projects.Remove(project);
-                _context.SaveChanges();
+                await _context.SaveChangesAsync();
             }
         }
 
-
-        public Project UpdateProject(int? id, Project project)
+        public async Task<Project> UpdateProjectAsync(int? id, Project project)
         {
-            var existingProject = _context.Projects.FirstOrDefault(project => project.Id == id);
+            var existingProject = await _context.Projects.FirstOrDefaultAsync(project => project.Id == id);
             if (existingProject != null)
             {
                 existingProject.Name = project.Name;
                 existingProject.Description = project.Description;
                 existingProject.StartDate = project.StartDate;
-                existingProject.EndDate = project.EndDate;
-                _context.SaveChanges();
+                await _context.SaveChangesAsync();
             }
             return existingProject;
         }
+
 
     }
 }

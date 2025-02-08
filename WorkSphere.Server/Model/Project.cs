@@ -5,7 +5,6 @@ using WorkSphere.Server.Model;
 
 namespace WorkSphere.Model
 {
-
     public enum Status
     {
         Active,
@@ -15,10 +14,8 @@ namespace WorkSphere.Model
 
     public class Project : BaseEntity
     {
-
-
         [Required(ErrorMessage = "Project name is required")]
-        public string? Name { get; set; }
+        public string Name { get; set; } = string.Empty;
 
         public string? Description { get; set; }
 
@@ -26,23 +23,20 @@ namespace WorkSphere.Model
         [DataType(DataType.Date)]
         public DateTime StartDate { get; set; }
 
-        [Required(ErrorMessage = "End date is required")]
-        [DataType(DataType.Date)]
-        public DateTime EndDate { get; set; }
-        [JsonConverter(typeof(JsonStringEnumConverter))]
+        [NotMapped]
+        public DateTime EndDate => StartDate.AddDays(ProjectTasks?.Sum(task => task.Duration) ?? 0);
 
+        [JsonConverter(typeof(JsonStringEnumConverter))]
         public Status Status { get; set; }
 
-        //navigation properties
-        // Foreign key for the Project Manager
-        [ForeignKey("ProjectManager")]
+        // One-to-Many: A ProjectManager manages multiple projects
         public int? ProjectManagerID { get; set; }
-
         public virtual ProjectManager? ProjectManager { get; set; }
 
-        // Relationship: One Project can have multiple tasks
-
+        // One-to-Many: A project can have multiple tasks
         public virtual ICollection<ProjectTask>? ProjectTasks { get; set; }
 
+        // Many-to-Many: A project can have multiple employees
+        public virtual ICollection<Employee>? Employees { get; set; }
     }
 }

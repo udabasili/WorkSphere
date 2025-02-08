@@ -53,6 +53,7 @@ namespace WorkSphere.Server.Repository
                 EmployeeID = projectTask.EmployeeID,
                 Order = projectTask.Order,
                 Status = projectTask.Status.ToString(),
+                Duration = projectTask.Duration,
                 NumOfTeamMembers = projectTeamMembers.Count(employee => employee.Id == projectTask.EmployeeID)
             }).ToList();
 

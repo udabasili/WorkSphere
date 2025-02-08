@@ -1,5 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using TastyTreats.Model.Entities;
+using TastyTreats.Types;
 
 namespace WorkSphere.Model
 {
@@ -9,20 +11,21 @@ namespace WorkSphere.Model
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
 
-        public DateTime CreatedAt
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+        public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+
+        public void UpdateTimestamp()
         {
-            get
-            {
-                return new DateTime();
-            }
+            UpdatedAt = DateTime.UtcNow;
         }
 
-        public DateTime UpdatedAt
+        public List<ValidationError> Errors { get; set; } = new List<ValidationError>();
+
+        public void AddError(string desc, ErrorType errorType)
         {
-            get
-            {
-                return new DateTime();
-            }
+            Errors.Add(new ValidationError(desc, errorType));
         }
     }
 }

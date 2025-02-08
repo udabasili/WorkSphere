@@ -105,11 +105,13 @@ namespace WorkSphere.Server
             builder.Services.AddScoped<IProjectRepo, ProjectRepo>();
             builder.Services.AddScoped<IProjectTaskRepo, ProjectTaskRepo>();
             builder.Services.AddScoped<IEmployeeRepo, EmployeeRepo>();
+            builder.Services.AddScoped<ITeamRepo, TeamRepo>();
 
             // Register Services
             builder.Services.AddScoped<IProjectService, ProjectService>();
             builder.Services.AddScoped<IProjectTaskService, ProjectTaskService>();
             builder.Services.AddScoped<IEmployeeService, EmployeeService>();
+            builder.Services.AddScoped<ITeamService, TeamService>();
 
             // Register AutoMapper
             builder.Services.AddAutoMapper(typeof(MappingProfile));

@@ -8,11 +8,11 @@ namespace WorkSphere.Server.Controllers
     [ApiController]
     public class EmployeesController : ControllerBase
     {
-        private readonly EmployeeService _employeeService;
+        private readonly IEmployeeService _employeeService;
         private readonly ILogger _logger;
 
 
-        public EmployeesController(EmployeeService employeeService, ILogger<EmployeesController> logger)
+        public EmployeesController(IEmployeeService employeeService, ILogger<EmployeesController> logger)
         {
             _employeeService = employeeService;
             _logger = logger;
@@ -37,20 +37,19 @@ namespace WorkSphere.Server.Controllers
         }
 
 
-        // GET: api/Employees/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Employee>> GetEmployee(int id)
         {
             try
             {
-                if (id <= 0 | id == null)
+                if (id <= 0)
                 {
                     return BadRequest(new
                     {
                         type = "https://tools.ietf.org/html/rfc7231#section-6.5.1",
                         title = "Bad Request",
                         status = 400,
-                        detail = "ID must be greater than 0",
+                        errors = new { id = new[] { "ID must be greater than 0" } },
                         traceId = HttpContext.TraceIdentifier
                     });
                 }
@@ -62,11 +61,11 @@ namespace WorkSphere.Server.Controllers
                         type = "https://tools.ietf.org/html/rfc7231#section-6.5.4",
                         title = "Not Found",
                         status = 404,
-                        detail = $"Employee with ID {id} not found.",
+                        errors = new { id = new[] { $"Employee with ID {id} not found." } },
                         traceId = HttpContext.TraceIdentifier
                     });
                 }
-                return employee;
+                return Ok(employee);
             }
             catch (Exception ex)
             {
@@ -76,7 +75,7 @@ namespace WorkSphere.Server.Controllers
                     type = "https://tools.ietf.org/html/rfc7231#section-6.6.1",
                     title = "Internal Server Error",
                     status = 500,
-                    detail = ex.Message,
+                    errors = new { message = new[] { ex.Message } },
                     traceId = HttpContext.TraceIdentifier
                 });
             }
@@ -87,10 +86,16 @@ namespace WorkSphere.Server.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> PutEmployee(int id, Employee employee)
         {
-
             if (id != employee.Id)
             {
-                return BadRequest();
+                return BadRequest(new
+                {
+                    type = "https://tools.ietf.org/html/rfc7231#section-6.5.1",
+                    title = "Bad Request",
+                    status = 400,
+                    errors = new { id = new[] { "ID in the URL does not match ID in the body" } },
+                    traceId = HttpContext.TraceIdentifier
+                });
             }
             try
             {
@@ -102,7 +107,7 @@ namespace WorkSphere.Server.Controllers
                         type = "https://tools.ietf.org/html/rfc7231#section-6.5.4",
                         title = "Not Found",
                         status = 404,
-                        detail = $"Employee with ID {id} not found.",
+                        errors = new { id = new[] { $"Employee with ID {id} not found." } },
                         traceId = HttpContext.TraceIdentifier
                     });
                 }
@@ -116,7 +121,7 @@ namespace WorkSphere.Server.Controllers
                     type = "https://tools.ietf.org/html/rfc7231#section-6.6.1",
                     title = "Internal Server Error",
                     status = 500,
-                    detail = ex.Message,
+                    errors = new { message = new[] { ex.Message } },
                     traceId = HttpContext.TraceIdentifier
                 });
             }
@@ -127,11 +132,20 @@ namespace WorkSphere.Server.Controllers
         [HttpPost]
         public async Task<ActionResult<Employee>> PostEmployee([FromBody] Employee employee)
         {
-
             try
             {
-
                 var newEmployee = await _employeeService.AddEmployee(employee);
+                if (newEmployee.Errors.Any())
+                {
+                    return BadRequest(new
+                    {
+                        type = "https://tools.ietf.org/html/rfc7231#section-6.5.1",
+                        title = "Bad Request",
+                        status = 400,
+                        errors = newEmployee.Errors.ToDictionary(e => e.ErrorType.ToString(), e => new[] { e.Description }),
+                        traceId = HttpContext.TraceIdentifier
+                    });
+                }
                 return CreatedAtAction("GetEmployee", new { id = newEmployee.Id }, newEmployee);
             }
             catch (Exception ex)
@@ -142,11 +156,12 @@ namespace WorkSphere.Server.Controllers
                     type = "https://tools.ietf.org/html/rfc7231#section-6.6.1",
                     title = "Internal Server Error",
                     status = 500,
-                    detail = ex.Message,
+                    errors = new { message = new[] { ex.Message } },
                     traceId = HttpContext.TraceIdentifier
                 });
             }
         }
+
 
         // DELETE: api/Employees/5
         [HttpDelete("{id}")]

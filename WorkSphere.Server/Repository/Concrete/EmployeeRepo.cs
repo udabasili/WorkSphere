@@ -14,8 +14,20 @@ namespace WorkSphere.Server.Repository.Concrete
             _context = context;
         }
 
-        private async Task<List<EmployeeDto>> GetEmployees(int pageIndex = 0, int pageSize = 10)
+        private async Task<List<EmployeeDto>> GetEmployees(int pageIndex = 0, int pageSize = 0)
         {
+            if (pageSize == 0)
+            {
+                return await _context.Employees.Select(employee => new EmployeeDto
+                {
+                    Id = employee.Id,
+                    FirstName = employee.FirstName,
+                    LastName = employee.LastName,
+                    Email = employee.Email,
+                    Salary = employee.Salary,
+                }).ToListAsync();
+            }
+
             var employees = await _context.Employees.Skip(pageIndex * pageSize).Take(pageSize).ToListAsync();
 
             return employees.Select(employee => new EmployeeDto
@@ -28,25 +40,25 @@ namespace WorkSphere.Server.Repository.Concrete
             }).ToList();
         }
 
-        private int GetEmployeesCount()
+        private async Task<int> GetEmployeesCount()
         {
-            return _context.Employees.Count();
+            return await _context.Employees.CountAsync();
         }
 
-        public Task<PagedEmployeeResponseDto> PagedEmployeeResponseDto(int pageIndex, int pageSize)
+        public async Task<PagedEmployeeResponseDto> GetPagedEmployeesAsync(int pageIndex, int pageSize)
         {
-            var employees = GetEmployees(pageIndex, pageSize);
-            var totalCount = GetEmployeesCount();
-            return Task.FromResult(new PagedEmployeeResponseDto
+            var employees = await GetEmployees(pageIndex, pageSize);
+            var totalCount = await GetEmployeesCount();
+            return new PagedEmployeeResponseDto
             {
-                Employees = employees.Result,
+                Employees = employees,
                 TotalCount = totalCount,
                 PageIndex = pageIndex,
                 PageSize = pageSize
-            });
+            };
         }
 
-        public async Task<Employee> GetEmployee(int id)
+        public async Task<Employee> GetEmployeeAsync(int id)
         {
             var employee = await _context.Employees
                 .Include(employee => employee.Salary)
@@ -54,29 +66,16 @@ namespace WorkSphere.Server.Repository.Concrete
             return employee;
         }
 
-        public async Task<Employee> AddEmployee(Employee employee)
+        public async Task<Employee> AddEmployeeAsync(Employee employee)
         {
-            if (EmployeeEmailExists(employee.Email))
-            {
-                throw new Exception("Email already exists");
-            }
             _context.Employees.Add(employee);
             await _context.SaveChangesAsync();
             return employee;
         }
 
 
-        public async Task<Employee> UpdateEmployee(int id, Employee employee)
+        public async Task<Employee> UpdateEmployeeAsync(int id, Employee employee)
         {
-            if (id != employee.Id)
-            {
-                throw new Exception("Id mismatch");
-            }
-
-            if (EmployeeEmailExists(employee.Email))
-            {
-                throw new Exception("Email already exists");
-            }
 
             _context.Entry(employee).State = EntityState.Modified;
             await _context.SaveChangesAsync();
@@ -85,7 +84,7 @@ namespace WorkSphere.Server.Repository.Concrete
         }
 
 
-        public async Task<Employee> DeleteEmployee(int id)
+        public async Task<Employee> DeleteEmployeeAsync(int id)
         {
             var employee = await _context.Employees.FindAsync(id);
             _context.Employees.Remove(employee);
@@ -93,13 +92,10 @@ namespace WorkSphere.Server.Repository.Concrete
             return employee;
         }
 
-        private bool EmployeeEmailExists(string email)
+        public async Task<bool> EmployeeEmailExists(Employee employee)
         {
-            return _context.Employees.Any(e => e.Email == email);
-        }
-        private bool EmployeeExists(int id)
-        {
-            return _context.Employees.Any(e => e.Id == id);
+
+            return await _context.Employees.AnyAsync(e => e.Email == employee.Email && e.Id != employee.Id);
         }
 
     }

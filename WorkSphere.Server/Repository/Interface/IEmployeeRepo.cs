@@ -6,15 +6,18 @@ namespace WorkSphere.Server.Repository
     public interface IEmployeeRepo
     {
 
-        Task<Employee> GetEmployee(int id);
+        Task<Employee> GetEmployeeAsync(int id);
 
-        Task<Employee> AddEmployee(Employee employee);
+        Task<Employee> AddEmployeeAsync(Employee employee);
 
-        Task<Employee> UpdateEmployee(int id, Employee employee);
+        Task<Employee> UpdateEmployeeAsync(int id, Employee employee);
 
-        Task<Employee> DeleteEmployee(int id);
+        Task<Employee> DeleteEmployeeAsync(int id);
 
-        Task<PagedEmployeeResponseDto> PagedEmployeeResponseDto(int pageIndex, int pageSize);
+        Task<PagedEmployeeResponseDto> GetPagedEmployeesAsync(int pageIndex, int pageSize);
+
+        Task<bool> EmployeeEmailExists(Employee employee);
+
 
     }
 }

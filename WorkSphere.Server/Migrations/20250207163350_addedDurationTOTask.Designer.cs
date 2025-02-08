@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using WorkSphere.Data;
 
@@ -11,9 +12,11 @@ using WorkSphere.Data;
 namespace WorkSphere.Server.Migrations
 {
     [DbContext(typeof(WorkSphereDbContext))]
-    partial class WorkSphereDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250207163350_addedDurationTOTask")]
+    partial class addedDurationTOTask
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

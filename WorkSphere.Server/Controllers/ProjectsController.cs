@@ -43,7 +43,7 @@ namespace WorkSphere.Server.Controllers
 
             try
             {
-                var project = _projectService.GetProject(id);
+                var project = await _projectService.GetProjectAsync(id);
                 return Ok(project);
             }
             catch (Exception ex)
@@ -65,7 +65,7 @@ namespace WorkSphere.Server.Controllers
 
             try
             {
-                var updatedProject = _projectService.UpdateProject(id, project);
+                var updatedProject = await _projectService.UpdateProjectAsync(id, project);
                 return Ok(updatedProject);
             }
             catch (Exception ex)
@@ -83,7 +83,7 @@ namespace WorkSphere.Server.Controllers
 
             try
             {
-                var newProject = _projectService.CreateProject(project);
+                var newProject = await _projectService.CreateProjectAsync(project);
                 return Ok(newProject);
             }
             catch (Exception ex)
@@ -98,7 +98,7 @@ namespace WorkSphere.Server.Controllers
         {
             try
             {
-                _projectService.DeleteProject(id);
+                _projectService.DeleteProjectAsync(id);
                 return Ok();
             }
             catch (Exception ex)

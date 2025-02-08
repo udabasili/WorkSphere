@@ -9,13 +9,13 @@ namespace WorkSphere.Server.Services
         public Task<PagedProjectsResponseDto> GetPagedProjectsAsync(int pageIndex, int pageSize);
         public Task<int> GetTotalProjectCountAsync();
 
-        public Task<Project> GetProject(int projectId);
+        public Task<Project> GetProjectAsync(int projectId);
 
-        public Project CreateProject(Project project);
+        public Task<Project> CreateProjectAsync(Project project);
 
-        public Project UpdateProject(int id, Project project);
+        public Task<Project> UpdateProjectAsync(int id, Project project);
 
-        public void DeleteProject(int projectId);
+        public void DeleteProjectAsync(int projectId);
 
 
     }

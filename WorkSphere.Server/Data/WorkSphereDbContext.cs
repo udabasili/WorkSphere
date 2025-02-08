@@ -20,50 +20,56 @@ namespace WorkSphere.Data
         {
             base.OnModelCreating(modelBuilder);
 
-            // Configure relationships and any other custom settings
-
             // Employee ↔ Salary One-to-One relationship
             modelBuilder.Entity<Employee>()
                 .HasOne(e => e.Salary)
                 .WithOne(s => s.Employee)
-                .HasForeignKey<Employee>(e => e.SalaryID);
+                .HasForeignKey<Salary>(s => s.EmployeeID)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // ProjectManager ↔ Salary One-to-One relationship
+            modelBuilder.Entity<ProjectManager>()
+                .HasOne(pm => pm.Salary)
+                .WithOne(s => s.ProjectManager)
+                .HasForeignKey<Salary>(s => s.ProjectManagerID)
+                .OnDelete(DeleteBehavior.Cascade); // Ensure Salary gets deleted when ProjectManager is deleted
+
 
             // Project ↔ ProjectManager One-to-Many relationship
             modelBuilder.Entity<Project>()
                 .HasOne(p => p.ProjectManager)
                 .WithMany(pm => pm.ManagedProjects)
                 .HasForeignKey(p => p.ProjectManagerID)
-                .OnDelete(DeleteBehavior.SetNull); // Prevent cascading delete of project when project manager is deleted
+                .OnDelete(DeleteBehavior.SetNull); // Prevent project deletion when project manager is removed
 
             // ProjectTask ↔ Project One-to-Many relationship
             modelBuilder.Entity<ProjectTask>()
                 .HasOne(t => t.Project)
                 .WithMany(p => p.ProjectTasks)
                 .HasForeignKey(t => t.ProjectID)
-                .OnDelete(DeleteBehavior.Cascade); // If a project is deleted, its tasks will be deleted as well
+                .OnDelete(DeleteBehavior.Cascade); // Deleting a project deletes all associated tasks
 
             // ProjectTask ↔ Employee One-to-Many relationship
             modelBuilder.Entity<ProjectTask>()
                 .HasOne(t => t.Employee)
                 .WithMany(e => e.ProjectTasks)
                 .HasForeignKey(t => t.EmployeeID)
-                .OnDelete(DeleteBehavior.SetNull); // Allow tasks to remain even if an employee is deleted
+                .OnDelete(DeleteBehavior.SetNull); // Tasks remain even if employee is removed
 
-            // ProjectManager ↔ ProjectManagerUser One-to-One relationship
+            // ProjectManagerUser ↔ ProjectManager One-to-One relationship
             modelBuilder.Entity<ProjectManagerUser>()
                 .HasOne(pm => pm.ProjectManager)
-                .WithMany()
-                .HasForeignKey(pm => pm.ProjectManagerId)
-                .OnDelete(DeleteBehavior.SetNull); // Allow project manager user to exist without a project manager
+                .WithOne()
+                .HasForeignKey<ProjectManagerUser>(pm => pm.ProjectManagerId)
+                .OnDelete(DeleteBehavior.Cascade); // Deleting a project manager deletes their user account
 
             // EmployeeUser ↔ Employee One-to-One relationship
             modelBuilder.Entity<EmployeeUser>()
                 .HasOne(eu => eu.Employee)
-                .WithMany()
-                .HasForeignKey(eu => eu.EmployeeID)
-                .OnDelete(DeleteBehavior.SetNull); // Allow employee user to exist without an employee entity
+                .WithOne()
+                .HasForeignKey<EmployeeUser>(eu => eu.EmployeeID)
+                .OnDelete(DeleteBehavior.Cascade); // Deleting an employee deletes their user account
 
-            // Add additional configurations if needed
         }
     }
 }

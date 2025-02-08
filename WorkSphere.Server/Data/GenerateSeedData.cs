@@ -1,10 +1,15 @@
-﻿namespace WorkSphere.Server.Data;
+﻿
+
+namespace WorkSphere.Server.Data;
 
 using Bogus;
+
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using WorkSphere.Data;
 using WorkSphere.Model;
 using WorkSphere.Server.Enums;
@@ -13,13 +18,12 @@ using WorkSphere.Server.Model;
 public class SeedData
 {
     private static Random _random = new Random();
-
     private static Faker _faker = new Faker();
 
     // Method to generate a random project name
     private static string GenerateProjectName()
     {
-        return $"{_faker.Company.CatchPhrase()}";
+        return _faker.Company.CatchPhrase();
     }
 
     public static List<Employee> GetEmployees(int count = 30)
@@ -38,7 +42,7 @@ public class SeedData
             .RuleFor(p => p.Name, f => GenerateProjectName())
             .RuleFor(p => p.Description, f => f.Lorem.Sentence())
             .RuleFor(p => p.StartDate, f => f.Date.Past(1))
-            .RuleFor(p => p.EndDate, f => f.Date.Future(1))
+            .RuleFor(p => p.Status, f => f.PickRandom<Status>())
             .Generate(count);
     }
 
@@ -58,15 +62,16 @@ public class SeedData
             .RuleFor(t => t.Name, f => f.Hacker.Verb() + " " + f.Hacker.Noun())
             .RuleFor(t => t.Description, f => f.Lorem.Sentence())
             .RuleFor(t => t.Status, f => f.PickRandom<Status>())
+            .RuleFor(t => t.Duration, f => f.Random.Int(1, 7))
             .Generate(count);
     }
 
     public static List<Salary> GetSalaries(int count = 60)
     {
         return new Faker<Salary>()
-            .RuleFor(s => s.BasicSalary, f => f.Random.Int(30000, 100000))
-            .RuleFor(s => s.Bonus, f => f.Random.Int(1000, 5000))
-            .RuleFor(s => s.Deductions, f => f.Random.Int(500, 2000))
+            .RuleFor(s => s.BasicSalary, f => f.Random.Decimal(30000, 100000))
+            .RuleFor(s => s.Bonus, f => f.Random.Decimal(1000, 5000))
+            .RuleFor(s => s.Deductions, f => f.Random.Decimal(500, 2000))
             .Generate(count);
     }
 
@@ -96,6 +101,7 @@ public class SeedData
 
     }
 
+
     public static async Task SeedEmployeeAsync(WorkSphereDbContext context)
     {
         if (!context.Employees.Any())
@@ -104,7 +110,6 @@ public class SeedData
             context.Employees.AddRange(employees);
             await context.SaveChangesAsync();
         }
-
     }
 
     public static async Task SeedProjectAsync(WorkSphereDbContext context)
@@ -125,24 +130,14 @@ public class SeedData
             context.ProjectManagers.AddRange(projectManagers);
             await context.SaveChangesAsync();
         }
-        // Assign project managers to projects
-        var projects = context.Projects.ToList();
-        var projectMans = context.ProjectManagers.ToList();
-        Dictionary<int, List<int>> projectManagerProjects = new Dictionary<int, List<int>>();
-        foreach (var projecMan in projectMans)
-        {
-            projectManagerProjects.Add(projecMan.Id, new List<int>());
 
-        }
+        var projects = context.Projects.ToList();
+        var projectManagersList = context.ProjectManagers.ToList();
 
         foreach (var project in projects)
         {
-            // Randomly assign a project manager to each project
-            var projectManagerId = projectMans[_random.Next(projectMans.Count)].Id;
-            // Set the ProjectManagerID property of the project
+            var projectManagerId = projectManagersList[_random.Next(projectManagersList.Count)].Id;
             project.ProjectManagerID = projectManagerId;
-            // Add the project to the project manager's list of projects
-            projectManagerProjects[projectManagerId].Add(project.Id);
         }
 
         await context.SaveChangesAsync();
@@ -150,44 +145,44 @@ public class SeedData
 
     public static async Task SeedTaskAsync(WorkSphereDbContext context)
     {
-        var tasks = GetTasks(); // Static list of tasks (common to all projects)
-
         if (!context.ProjectTasks.Any())
         {
+            var tasks = GetTasks();
             var projects = context.Projects.ToList();
             var employees = context.Employees.ToList();
 
-            foreach (var project in projects)
+            for (int proj = 0; proj < projects.Count; proj++)
             {
-                // Ensure each employee is only assigned one task per project
+                var project = projects[proj];
                 var assignedEmployeeIds = new HashSet<int>();
 
                 for (int i = 0; i < tasks.Count; i++)
                 {
-                    // Assign task to an employee not already assigned in this project
                     var availableEmployee = employees.FirstOrDefault(e => !assignedEmployeeIds.Contains(e.Id));
                     if (availableEmployee == null)
                     {
                         throw new InvalidOperationException("Not enough employees to assign tasks for the project.");
                     }
 
-                    // Clone the task object to avoid modifying the original task list
                     var projectTask = new ProjectTask
                     {
                         Name = tasks[i].Name,
                         Description = tasks[i].Description,
-                        Order = i + 1,
+                        Duration = tasks[i].Duration,
+                        Status = tasks[i].Status,
                         ProjectID = project.Id,
-                        EmployeeID = availableEmployee.Id
+                        EmployeeID = availableEmployee.Id,
+                        //increment the order by 1 for each project 
+                        Order = i + 1
                     };
 
                     assignedEmployeeIds.Add(availableEmployee.Id);
                     context.ProjectTasks.Add(projectTask);
                 }
             }
-        }
 
-        await context.SaveChangesAsync();
+            await context.SaveChangesAsync();
+        }
     }
 
     public static async Task SeedProjectManagerSalaryAsyc(WorkSphereDbContext context)
@@ -196,6 +191,7 @@ public class SeedData
 
         // Assign salaries to project managers
         var salaries = await context.Salaries.ToListAsync();
+        //get salaries without employee id i.e salary with no employee attached
         var salariesWithoutEmployee = salaries.Where(s => s.EmployeeID == 0 || s.EmployeeID == null).ToList();
 
         for (int i = 0; i < projectManagers.Count; i++)
@@ -253,6 +249,7 @@ public class SeedData
             await context.SaveChangesAsync();
         }
     }
+
 
     public static async Task SeedUsersAsync(UserManager<ApplicationUser> userManager, WorkSphereDbContext context)
     {
@@ -323,18 +320,16 @@ public class SeedData
     }
 
 
-
     public static async Task SeedDataAsync(WorkSphereDbContext context, UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager)
     {
         await SeedAdminAsync(userManager, roleManager);
         await SeedEmployeeAsync(context);
         await SeedProjectAsync(context);
         await SeedProjectManagerAsync(context);
-        await SeedUsersAsync(userManager, context);
-
         await SeedTaskAsync(context);
         await SeedSalaryAsync(context);
-        //await SeedProjectManagerSalaryAsyc(context);
-    }
+        await SeedProjectManagerSalaryAsyc(context);
+        await SeedUsersAsync(userManager, context);
 
+    }
 }

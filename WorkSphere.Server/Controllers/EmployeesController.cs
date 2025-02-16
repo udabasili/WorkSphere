@@ -65,6 +65,17 @@ namespace WorkSphere.Server.Controllers
                         traceId = HttpContext.TraceIdentifier
                     });
                 }
+                if (employee.Errors.Count > 0)
+                {
+                    return BadRequest(new
+                    {
+                        type = "https://tools.ietf.org/html/rfc7231#section-6.5.1",
+                        title = "Bad Request",
+                        status = 400,
+                        errors = employee.Errors.ToDictionary(e => e.ErrorType.ToString(), e => new[] { e.Description }),
+                        traceId = HttpContext.TraceIdentifier
+                    });
+                }
                 return Ok(employee);
             }
             catch (Exception ex)
@@ -108,6 +119,18 @@ namespace WorkSphere.Server.Controllers
                         title = "Not Found",
                         status = 404,
                         errors = new { id = new[] { $"Employee with ID {id} not found." } },
+                        traceId = HttpContext.TraceIdentifier
+                    });
+                }
+                if (updatedEmployee.Errors.Count > 0)
+
+                {
+                    return BadRequest(new
+                    {
+                        type = "https://tools.ietf.org/html/rfc7231#section-6.5.1",
+                        title = "Bad Request",
+                        status = 400,
+                        errors = updatedEmployee.Errors.ToDictionary(e => e.ErrorType.ToString(), e => new[] { e.Description }),
                         traceId = HttpContext.TraceIdentifier
                     });
                 }

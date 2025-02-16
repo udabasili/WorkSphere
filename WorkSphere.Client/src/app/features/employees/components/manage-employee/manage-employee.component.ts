@@ -9,6 +9,14 @@ import {ToastService} from '../../../../services/toast.service';
 import {inputDateFormat} from '../../../../shared/utils/date-utils';
 import {ErrorHandlerService} from '../../../../core/services/error-handler.service';
 
+const defaultEmployee = new Employee(
+  null,
+  '',
+  '',
+  '',
+  new Date(),
+);
+
 @Component({
   selector: 'app-manage-employee',
   standalone: false,
@@ -17,6 +25,7 @@ import {ErrorHandlerService} from '../../../../core/services/error-handler.servi
 })
 
 export class ManageEmployeeComponent implements OnInit, OnDestroy {
+  //region Properties
   @Input() visible: boolean = false;
   @Input() employeeId: number | null = null;
   @Output() visibilityChange: EventEmitter<boolean> = new EventEmitter<boolean>();
@@ -27,17 +36,13 @@ export class ManageEmployeeComponent implements OnInit, OnDestroy {
   saveMessage: string = '';
   mode: string = 'add';
   buttonLoading: boolean = false;
-  employee: Employee = new Employee(
-    null,
-    '',
-    '',
-    '',
-    new Date(),
-  );
+  employee: Employee = defaultEmployee;
   private addEmployeeSubscription?: Subscription
   private getEmployeeSubscription?: Subscription
   private updateEmployeeSubscription?: Subscription
+  //endregion
 
+  //region Constructor
   constructor(
     private toastService: ToastService,
     private datePipe: DatePipe,
@@ -46,6 +51,15 @@ export class ManageEmployeeComponent implements OnInit, OnDestroy {
   ) {
   }
 
+  //endregion
+
+  //region Lifecycle Hooks
+  /**
+   * Initialize the component
+   * If the employeeId is provided, load the employee details i.e. edit mode
+   * If the employeeId is not provided, it is a new employee i.e. add mode
+   * Convert the employment date to a valid date format
+   */
   ngOnInit(): void {
     if (!this.employeeId) {
       this.title = 'Add Employee'
@@ -58,8 +72,28 @@ export class ManageEmployeeComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Validate the date to ensure it is not in the future
-   * If the date is in the future, reset it to today
+   * Unsubscribe from the subscriptions
+   */
+  ngOnDestroy(): void {
+    if (this.addEmployeeSubscription) {
+      this.addEmployeeSubscription.unsubscribe()
+    }
+    if (this.getEmployeeSubscription) {
+      this.getEmployeeSubscription.unsubscribe()
+    }
+    if (this.updateEmployeeSubscription) {
+      this.updateEmployeeSubscription.unsubscribe()
+    }
+  }
+
+//endregion
+
+  //region Public Methods
+
+  /**
+   * Validate the selected date
+   * - If the selected date is greater than today, mark the date as invalid
+   * @param date - The date to validate
    */
   validateDate(date: NgModel) {
     if (!date.viewModel) return; // Ensure there's a value to validate
@@ -76,21 +110,19 @@ export class ManageEmployeeComponent implements OnInit, OnDestroy {
     }
   }
 
+  /**
+   * Handle the form submission
+   * @param form - The form to submit
+   */
   onFormSubmit(form: NgForm) {
-    this.message = '';
-    this.saveMessage = '';
 
-    //if the form is not valid, we can return
     if (form.invalid) {
       this.message = 'Please correct the validation errors';
-      console.log(this.message)
       return;
     }
     if (this.mode === 'add') {
       this.addEmployeeSubscription = this.employeeService.createEmployee(this.employee).subscribe({
         next: employee => {
-          console.log(employee)
-          this.saveMessage = `Employee saved with Id: ${employee.id}`;
           this.toastService.showSuccess(`Employee created with Id: ${employee.id}`)
           this.buttonLoading = false;
           this.employeeSaved.emit();
@@ -129,18 +161,6 @@ export class ManageEmployeeComponent implements OnInit, OnDestroy {
   onClose() {
     this.visible = false;
     this.visibilityChange.emit(false);
-  }
-
-  ngOnDestroy(): void {
-    if (this.addEmployeeSubscription) {
-      this.addEmployeeSubscription.unsubscribe()
-    }
-    if (this.getEmployeeSubscription) {
-      this.getEmployeeSubscription.unsubscribe()
-    }
-    if (this.updateEmployeeSubscription) {
-      this.updateEmployeeSubscription.unsubscribe()
-    }
   }
 
   private getEmployeeById(id: string): void {

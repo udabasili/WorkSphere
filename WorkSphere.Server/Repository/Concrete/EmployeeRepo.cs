@@ -3,7 +3,7 @@ using WorkSphere.Data;
 using WorkSphere.Server.Dtos;
 using WorkSphere.Server.Model;
 
-namespace WorkSphere.Server.Repository.Concrete
+namespace WorkSphere.Server.Repository
 {
     public class EmployeeRepo : IEmployeeRepo
     {

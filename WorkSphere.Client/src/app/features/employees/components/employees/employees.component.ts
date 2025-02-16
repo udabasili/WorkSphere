@@ -1,5 +1,5 @@
 import {Component, Input, OnDestroy, OnInit} from '@angular/core';
-import {firstValueFrom, Subject, Subscription, takeUntil} from 'rxjs';
+import {Subject, Subscription, takeUntil} from 'rxjs';
 import {EmployeeService} from '../../services/employee.service';
 import {Employee} from '../../model/employee';
 import {ConfirmationService, MenuItem} from 'primeng/api';
@@ -15,6 +15,7 @@ import {ErrorHandlerService} from '../../../../core/services/error-handler.servi
 })
 
 export class EmployeesComponent implements OnInit, OnDestroy {
+  //region Properties
   @Input() visible = false;
 
   employees: Employee[] = [];
@@ -29,9 +30,10 @@ export class EmployeesComponent implements OnInit, OnDestroy {
   pageSize = 10;
   totalRecords = 0;
 
-  private deleteEmployeeSubscription?: Subscription;
-  private routeDestroy$ = new Subject<void>();
+  private subscriptions: Subscription[] = [];
+  //endregion
 
+  //region Constructor
   constructor(
     private employeeService: EmployeeService,
     private route: ActivatedRoute,
@@ -42,22 +44,51 @@ export class EmployeesComponent implements OnInit, OnDestroy {
   ) {
   }
 
+  //endregion
+
+  //region Lifecycle Hooks
+
+  /**
+   * Initializes the component
+   *  - Handles the route employee selection
+   *  - Subscribes to employee response
+   *  - Fetches employees
+   *  - Handles the visibility change of the drawer
+   */
   ngOnInit(): void {
     this.handleRouteEmployeeSelection();
+    this.subscriptions.push(
+      this.employeeService.employeeResponse$.subscribe((response) => {
+        if (response) {
+          this.employees = response.employees;
+          this.totalRecords = response.totalCount;
+          this.pageIndex = response.pageIndex;
+          this.pageSize = response.pageSize;
+          this.isLoading = false;
+        }
+      })
+    );
   }
 
+  /**
+   * Unsubscribes from all subscriptions
+   */
   ngOnDestroy(): void {
-    this.routeDestroy$.next(); // Unsubscribe from all observables
-    this.routeDestroy$.complete(); // Complete the subject
-    if (this.deleteEmployeeSubscription) {
-      this.deleteEmployeeSubscription.unsubscribe();
-    }
+    this.subscriptions.forEach(sub => sub.unsubscribe());
     this.showAddEmployee = false;
     this.showDetailsEmployee = false;
     this.selectedEmployeeId = null;
-
   }
 
+  //endregion
+
+  //region Public Methods
+
+  /**
+   * Opens the drawer to add or edit an employee
+   * @param employeeId - The employee id to edit. If not provided,
+   * it will open the drawer to add a new employee
+   */
   openDrawer(employeeId?: number) {
     if (employeeId) {
       this.selectedEmployeeId = employeeId;
@@ -67,46 +98,63 @@ export class EmployeesComponent implements OnInit, OnDestroy {
     this.showAddEmployee = true;
   }
 
+  /**
+   * Handles the pagination. Fetches the previous page of employees
+   * Only if the current page is not the first page
+   */
   prevPage() {
-    this.pageIndex = this.pageIndex - 1;
-    this.loadEmployees();
+    if (this.pageIndex > 0) {
+      this.pageIndex--;
+      this.getEmployees(this.pageIndex, this.pageSize);
+    }
+
   }
 
+  /**
+   * Handles the pagination. Fetches the next page of employees
+   * Only if the current page is not the last page i.e.
+   * the current page index * page size is less than the total records
+   */
   nextPage() {
-    this.pageIndex = this.pageIndex + 1;
-    this.loadEmployees();
+    if ((this.pageIndex + 1) * this.pageSize < this.totalRecords) {
+      this.pageIndex++;
+      this.getEmployees(this.pageIndex, this.pageSize);
+    }
   }
 
+  /**
+   * Handles the visibility change of the drawer
+   * @param isVisible - The visibility status of the drawer
+   */
   handleDrawerVisibilityChange(isVisible: boolean) {
     this.showAddEmployee = isVisible;
     if (!isVisible) {
-      this.loadEmployees(
-
-      ); // Reload employees when the drawer is closed
+      this.getEmployees(this.pageIndex, this.pageSize);
     }
   }
 
-  async loadEmployees() {
-    try {
-      //get all employees
-      //firstValueFrom is used to convert an observable to a promise
-      const response = await firstValueFrom(this.employeeService.getEmployees(this.pageIndex, this.pageSize));
-      this.employees = response.employees;
-      this.pageIndex = response.pageIndex;
-      this.pageSize = response.pageSize;
-      this.totalRecords = response.totalCount;
-      this.isLoading = false;
-    } catch (error: any) {
-      this.errorHandlerService.apiErrorHandler(error);
-      this.isLoading = false;
-
-    }
+  /**
+   * Fetches the employees outside of behavior subject
+   * @param pageIndex - The page index
+   * @param pageSize - The page size
+   */
+  getEmployees(pageIndex: number = 0, pageSize: number): void {
+    this.employeeService.refetchEmployees(pageIndex, pageSize);
   }
 
+  /**
+   * Handles the employee selection. Navigates to the employee details page
+   * @param employee - The selected employee
+   */
   handleEmployeeSelected(employee: Employee): void {
     this.router.navigate(['/employees'], {queryParams: {id: employee.id}});
   }
 
+  /**
+   * Handles the employee deletion
+   * @param event
+   * @param employeeId
+   */
   confirmDelete(event: Event, employeeId: number): void {
     this.confirmationService.confirm({
       target: event.target as EventTarget,
@@ -129,6 +177,9 @@ export class EmployeesComponent implements OnInit, OnDestroy {
     });
   }
 
+  //endregion
+
+  //region Private Methods
 
   /**
    * Handles the route project selection
@@ -137,37 +188,50 @@ export class EmployeesComponent implements OnInit, OnDestroy {
    * @private
    */
   private handleRouteEmployeeSelection(): void {
-    this.route.queryParams.pipe(takeUntil(this.routeDestroy$)).subscribe(params => {
-      const employeeId = parseInt(params['id'], 10);
-      if (employeeId) {
-        this.selectedEmployeeId = employeeId;
-        this.showDetailsEmployee = true
-        this.items = [{label: 'Employees', url: '/employees'}, {
-          label: `${employeeId}`,
-          url: '/employees',
-          queryParams: {id: employeeId}
-        }]
+    this.subscriptions.push(
+      this.route.queryParams.pipe(takeUntil(new Subject())).subscribe({
+        next: async (params) => {
+          if (params['id']) {
+            const employeeId = parseInt(params['id'], 10);
+            this.selectedEmployeeId = employeeId;
+            this.showDetailsEmployee = true;
+            this.selectedEmployeeId = employeeId;
+            this.showDetailsEmployee = true
+            this.items = [{label: 'Employees', url: '/employees'}, {
+              label: `${employeeId}`,
+              url: '/employees',
+              queryParams: {id: employeeId}
+            }]
 
-      } else {
-        this.loadEmployees();
-        this.showDetailsEmployee = false
-        this.items = [{label: 'Employees', url: '/employees'}]
+          } else {
+            this.getEmployees(this.pageIndex, this.pageSize);
+            this.showDetailsEmployee = false
+            this.items = [{label: 'Employees', url: '/employees'}]
 
-      }
-    });
+          }
+        },
+        error: (error) => {
+          this.errorHandlerService.apiErrorHandler(error);
+        }
+      })
+    );
   }
 
   private deleteEmployee(employeeId: number): void {
-    this.deleteEmployeeSubscription = this.employeeService.deleteEmployee(employeeId).subscribe({
-      next: () => {
-        this.toastService.showSuccess('Employee Deleted');
-        this.pageIndex = 0;
-        this.loadEmployees();
-      },
-      error: (error) => {
-        this.errorHandlerService.apiErrorHandler(error);
-      }
-    });
+    this.subscriptions.push(
+      this.employeeService.deleteEmployee(employeeId).subscribe({
+        next: () => {
+          this.toastService.showSuccess('Employee Deleted');
+          this.pageIndex = 0;
+          this.getEmployees(this.pageIndex, this.pageSize);
+        },
+        error: (error) => {
+          this.errorHandlerService.apiErrorHandler(error);
+        }
+      })
+    );
   }
+
+  //endregion
 
 }

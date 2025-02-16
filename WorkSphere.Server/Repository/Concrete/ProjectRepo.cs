@@ -68,16 +68,14 @@ namespace WorkSphere.Server.Repository.Concrete
             return project;
         }
 
-        public async void DeleteProjectAsync(int projectId)
+        public async Task<Project> DeleteProjectAsync(int projectId)
         {
-
-            var project = await _context.Projects.FirstOrDefaultAsync(project => project.Id == projectId);
-            if (project != null)
-            {
-                _context.Projects.Remove(project);
-                await _context.SaveChangesAsync();
-            }
+            var project = await _context.Projects.FindAsync(projectId);
+            _context.Projects.Remove(project);
+            await _context.SaveChangesAsync();
+            return project;
         }
+
 
         public async Task<Project> UpdateProjectAsync(int? id, Project project)
         {

@@ -62,20 +62,7 @@ export class SideNavComponent implements OnInit {
           icon: 'group',
           route: '/team-management',
           role: ['Admin', 'ProjectManager'],
-          children: [
-            {
-              label: 'Employees',
-              icon: 'people',
-              route: '/team-management/employees',
-              role: ['Admin', 'ProjectManager'], // Admin and Project Managers can view employees
-            }
-          ],
-        },
-        {
-          label: 'Time Tracking',
-          icon: 'access_time',
-          route: '/time-tracking',
-          role: ['Admin', 'ProjectManager', 'Employee'],
+
         }
       ]
     },

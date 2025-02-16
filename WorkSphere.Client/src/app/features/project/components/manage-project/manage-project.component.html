@@ -92,6 +92,7 @@
               #endDate="ngModel"
               (ngModelChange)="validateDate(endDate)"
               [(ngModel)]="project.endDate  "
+              [disabled]="true"
               [ngClass]="{
         'p-invalid border-red-500':
         (endDate.touched || endDate.dirty || projectForm.submitted) &&
@@ -103,7 +104,7 @@
               pInputText
               required
               type="date"/>
-            <label for="endDate">End Date</label>
+            <label for="endDate">End Date(Automatically Calculated )</label>
             <i
               [class.visible]="(endDate.touched || endDate.dirty || projectForm.submitted) &&
           (endDate.hasError('required') || endDate.hasError('dateError'))"

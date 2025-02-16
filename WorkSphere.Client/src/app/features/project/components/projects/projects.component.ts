@@ -9,16 +9,14 @@ import {ActivatedRoute, Router} from '@angular/router';
 
 @Component({
   selector: 'app-projects',
-  standalone: false,
-
   templateUrl: './projects.component.html',
-  styleUrl: './projects.component.css'
+  styleUrl: './projects.component.css',
+  standalone: false
 })
 export class ProjectsComponent implements OnInit, OnDestroy {
-
   isLoading = true;
   showAddProject = false;
-  showDetailsProject: boolean = false
+  showDetailsProject = false;
   selectedProjectId: number | null = null;
   items: MenuItem[] = [];
   home: MenuItem = {label: 'Home', url: '/'};
@@ -26,11 +24,8 @@ export class ProjectsComponent implements OnInit, OnDestroy {
   pageIndex = 0;
   pageSize = 10;
   totalRecords = 0;
-  projects: Array<Project> = []
-
-  private getProjectSubscription: Subscription
-  private deleteProjectSubscription?: Subscription
-  private routerSubscription?: Subscription
+  projects: Project[] = [];
+  private subscriptions: Subscription[] = [];
 
   constructor(
     private projectService: ProjectService,
@@ -38,53 +33,52 @@ export class ProjectsComponent implements OnInit, OnDestroy {
     private confirmService: ConfirmationService,
     private toastService: ToastService,
     private route: ActivatedRoute,
-    private router: Router,
+    private router: Router
   ) {
   }
 
   ngOnInit(): void {
-    this.handleRouteProjectSelection()
+    this.handleRouteProjectSelection();
+    this.subscriptions.push(
+      this.projectService.projectResponse$.subscribe((response) => {
+        if (response) {
+          this.projects = response.projects;
+          this.totalRecords = response.totalCount;
+          this.pageIndex = response.pageIndex;
+          this.pageSize = response.pageSize;
+          this.isLoading = false;
+        }
+      })
+    );
+    this.projectService.getProjects(this.pageIndex, this.pageSize);
   }
 
   ngOnDestroy(): void {
-    if (this.getProjectSubscription) {
-      this.getProjectSubscription.unsubscribe()
-    }
-    if (this.deleteProjectSubscription) {
-      this.deleteProjectSubscription.unsubscribe()
-    }
-    if (this.routerSubscription) {
-      this.routerSubscription.unsubscribe()
-    }
-    this.showAddProject = false;
+    this.subscriptions.forEach(sub => sub.unsubscribe());
   }
 
-
   openDrawer(projectId?: number) {
-    if (projectId) {
-      this.selectedProjectId = projectId;
-    } else {
-      this.selectedProjectId = null;
-    }
+    this.selectedProjectId = projectId || null;
     this.showAddProject = true;
   }
 
   prevPage() {
-    this.pageIndex = this.pageIndex - 1;
-    this.loadProjects();
+    if (this.pageIndex > 0) {
+      this.pageIndex--;
+      this.projectService.getProjects(this.pageIndex, this.pageSize);
+    }
   }
 
   nextPage() {
-    this.pageIndex = this.pageIndex + 1;
-    this.loadProjects();
+    if ((this.pageIndex + 1) * this.pageSize < this.totalRecords) {
+      this.pageIndex++;
+      this.projectService.getProjects(this.pageIndex, this.pageSize);
+    }
   }
 
   handleDrawerVisibilityChange(isVisible: boolean) {
     this.showAddProject = isVisible;
-    if (!isVisible) {
-      this.loadProjects(
-      );
-    }
+    if (!isVisible) this.projectService.getProjects(this.pageIndex, this.pageSize);
   }
 
   confirmDelete(event: Event, projectId: number): void {
@@ -94,18 +88,9 @@ export class ProjectsComponent implements OnInit, OnDestroy {
       header: 'Delete Confirmation',
       icon: 'pi pi-info-circle',
       rejectLabel: 'Cancel',
-      rejectButtonProps: {
-        label: 'Cancel',
-        severity: 'secondary',
-        outlined: true,
-      },
-      acceptButtonProps: {
-        label: 'Delete',
-        severity: 'danger',
-      },
-      accept: () => {
-        this.deleteProject(projectId);
-      },
+      rejectButtonProps: {label: 'Cancel', severity: 'secondary', outlined: true},
+      acceptButtonProps: {label: 'Delete', severity: 'danger'},
+      accept: () => this.deleteProject(projectId)
     });
   }
 
@@ -114,63 +99,39 @@ export class ProjectsComponent implements OnInit, OnDestroy {
   }
 
   deleteProject(projectId: number): void {
-    this.deleteProjectSubscription = this.projectService.deleteProject(projectId).subscribe({
-      next: () => {
-        this.toastService.showSuccess('Project Deleted');
-        //go back to the first page if the current page has no records
-        this.pageIndex = 0;
-        this.loadProjects();
-      },
-      error: (error) => {
-        this.errorHandlerService.apiErrorHandler(error);
-      }
-    });
+    this.subscriptions.push(
+      this.projectService.deleteProject(projectId).subscribe({
+        next: () => {
+          this.toastService.showSuccess('Project Deleted');
+          this.projectService.refreshProjects(this.pageIndex, this.pageSize);
+        },
+        error: (error) => this.errorHandlerService.apiErrorHandler(error)
+      })
+    );
   }
 
-  loadProjects() {
-    this.getProjectSubscription = this.projectService.getProjects(this.pageIndex, this.pageSize).subscribe({
-      next: (apiResponse) => {
-        this.projects = apiResponse.projects
-        this.totalRecords = apiResponse.totalCount
-        this.pageIndex = apiResponse.pageIndex
-        this.pageSize = apiResponse.pageSize
-
-        this.isLoading = false
-      },
-      error: (error) => {
-        this.errorHandlerService.apiErrorHandler(error);
-        this.isLoading = false
-      }
-    })
+  refetchProjects() {
+    this.projectService.refreshProjects(0, 10);
   }
 
-  closeLoader() {
-    this.isLoading = false;
-
-  }
-
-  /**
-   * Handles the route project selection
-   * If a project id is present in the route, it will show the project details
-   * Otherwise, it will show all projects
-   * @private
-   */
   private handleRouteProjectSelection(): void {
-    this.routerSubscription = this.route.queryParams.subscribe(params => {
-      const projectId = parseInt(params['id'], 10);
-      if (projectId) {
-        this.selectedProjectId = projectId;
-        this.showDetailsProject = true;
-        this.items = [
-          {label: 'Projects', url: '/projects'},
-          {label: `${projectId}`, url: '/projects', queryParams: {id: projectId}}
-        ];
-
-      } else {
-        this.loadProjects();
-        this.showDetailsProject = false;
-        this.items = [{label: 'Projects', url: '/projects'}];
-      }
-    });
+    this.subscriptions.push(
+      this.route.queryParams.subscribe(params => {
+        const projectId = parseInt(params['id'], 10);
+        console.log("projectId", projectId);
+        if (projectId) {
+          this.selectedProjectId = projectId;
+          this.showDetailsProject = true;
+          this.items = [
+            {label: 'projects', url: '/projects'},
+            {label: `${projectId}`, url: '/projects', queryParams: {id: projectId}}
+          ];
+        } else {
+          this.showDetailsProject = false;
+          this.items = [{label: 'projects', url: '/projects'}];
+          this.projectService.getProjects(this.pageIndex, this.pageSize);
+        }
+      })
+    );
   }
 }

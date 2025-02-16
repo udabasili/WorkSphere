@@ -12,8 +12,6 @@
         <p-button (click)="handleProjectSelected()" label="Select" severity="success"/>
       </div>
     </div>
-
-    <!-- Team Section (Displayed after selecting a project) -->
     <div *ngIf="selectedProjectConfirmed" class="mt-6">
       <div class="mb-4">
         <span class="text-lg font-semibold">Team Members:</span>
@@ -29,11 +27,129 @@
           <p class="text-gray-500">No team members assigned.</p>
         </ng-template>
       </div>
-      <p-button (click)="addTeam()" class="mt-2" icon="pi pi-plus" label="Add Team"></p-button>
     </div>
-
   </div>
-  <div *ngIf="selectedProjectConfirmed" class="mt-6 w-full">
+  <p-dialog [(visible)]="showModal" [modal]="true" [style]="{ width: '25rem' }" header="{{mode}}">
+    <form #taskForm="ngForm" (ngSubmit)="onFormSubmit(taskForm)">
+      <div class="flex items-center gap-4 mb-4">
+        <label class="font-semibold w-24" for="title"> Title</label>
+        <input
+          #title="ngModel"
+          [(ngModel)]="task.name"
+          [ngClass]="{
+            'p-invalid border-red-500':
+            (title.touched || title.dirty || taskForm.submitted) &&
+            (title.hasError('required') || title.hasError('minlength'))
+          }"
+          autocomplete="off"
+          class="flex-auto"
+          id="title"
+          name="title"
+          pInputText
+          required
+        />
+        <i
+          [class.visible]="(title.touched || title.dirty || taskForm.submitted) &&
+                    (title.hasError('required') || title.hasError('minlength'))"
+          [title]="title.hasError('required') ? 'Title is required' : title.hasError('minlength') ? 'Minimum length for Title is ' + title.getError('minlength').requiredLength : ''"
+          class="fas fa-exclamation-circle err text-xl ml-2 text-red-700 invisible"
+        >
+        </i>
+      </div>
+      <div class="flex items-center gap-4 mb-8">
+        <label
+          class="font-semibold w-24"
+          for="description">
+          Description
+
+        </label>
+        <textarea
+          #description="ngModel"
+          [(ngModel)]="task.description"
+          [ngClass]="{
+            'p-invalid border-red-500':
+            (description.touched || description.dirty || taskForm.submitted) &&
+            (description.hasError('required') || description.hasError('minlength'))
+          }"
+          class="flex-auto"
+          cols="30"
+          id="description"
+          name="description"
+          pTextarea
+          required
+          rows="5"
+        >
+        </textarea>
+        <i
+          [class.visible]="(description.touched || description.dirty || taskForm.submitted) &&
+                    (description.hasError('required') || description.hasError('minlength'))"
+          [title]="description.hasError('required') ? 'Description is required' : description.hasError('minlength') ? 'Minimum length for Description is ' + description.getError('minlength').requiredLength : ''"
+          class="fas fa-exclamation-circle err text-xl ml-2 text-red-700 invisible"
+        >
+        </i>
+
+      </div>
+      <div class="flex items-center gap-4 mb-8">
+        <label
+          class="font-semibold w-24" for="duration"> Duration (days)</label>
+        <input
+          #duration="ngModel"
+          (ngModelChange)="validateDuration(duration)"
+          [(ngModel)]="task.duration"
+          [min]="1"
+          [ngClass]="{
+            'p-invalid border-red-500':
+            (duration.touched || duration.dirty || taskForm.submitted) &&
+            (duration.hasError('required') || duration.hasError('minlength') || duration.hasError('durationError'))
+          }"
+          class="flex-auto"
+          id="duration"
+          name="duration"
+          pInputText
+          required
+          type="number"
+        />
+        <i
+          [class.visible]="(duration.touched || duration.dirty || taskForm.submitted) &&
+            (duration.hasError('required') || duration.hasError('minlength') || duration.hasError('durationError'))"
+          [title]="duration.hasError('required') ? 'Duration is required' : duration.hasError('minlength') ? 'Minimum length for Duration is ' + duration.getError('minlength').requiredLength : duration.hasError('durationError') ? 'Duration must be greater than 0' : ''"
+          class="fas fa-exclamation-circle err text-xl ml-2 text-red-700 invisible"
+        >
+        </i>
+      </div>
+      <div class="mt-2 block w-full">
+        <label class="font-semibold w-24" for="newMembers"> Team Members</label>
+        <select
+          #newMembers="ngModel"
+          [(ngModel)]="task.employeeIDs"
+          class="px-4 py-2 border rounded-md w-full"
+          id="newMembers"
+          multiple name="newMembers">
+          <option *ngFor="let member of availableTeamMembers" [value]="member.id">
+            {{ member.firstName }} {{ member.lastName }}
+          </option>
+          required
+          [class.visible]="(newMembers.touched || newMembers.dirty || taskForm.submitted) &&
+          (newMembers.hasError('required') || newMembers.hasError('minlength'))"
+        </select>
+        <i
+          [title]="newMembers.hasError('required') ? 'Team Members is required' : newMembers.hasError('minlength') ? 'Minimum length for Team Members is ' + newMembers.getError('minlength').requiredLength : ''"
+          class="fas fa-exclamation-circle err text-xl ml-2 text-red-700 invisible"
+        >
+        </i>
+      </div>
+      <div class="flex justify-end gap-2">
+        <button (click)="closeModal(task)" pButton>
+          Cancel
+        </button>
+        <button pButton type="submit">
+          {{ mode }}
+        </button>
+      </div>
+    </form>
+  </p-dialog>
+  <app-activity [show]="isLoading "></app-activity>
+  <div *ngIf="selectedProjectConfirmed || !isLoading" class="mt-6 w-full">
     <div class="flex justify-between items-center">
         <span class="text-2xl font-semibold">
           Drag and drop to re-order tasks and click submit to save changes.
@@ -50,7 +166,7 @@
       <div class="p-4">
         <div class="flex justify-between items-center mb-2">
           <span class="text-2xl font-semibold">Not Started</span>
-          <i class="fa fa-plus cursor-pointer"></i>
+          <i (click)="showAddTaskModal()" class="fa fa-plus cursor-pointer"></i>
         </div>
         <div
           #notStartedList="cdkDropList"
@@ -60,10 +176,16 @@
           cdkDropList
           class="example-list border-2 border-transparent min-h-1/2">
           @for (item of inactiveTasks; track item) {
-            <div class="bg-white shadow-lg rounded-lg p-4 mb-5 cursor-move "
-                 cdkDrag>
-              <div class="font-bold text-lg">{{ item.name | titlecase }}</div>
-              <p class="text-gray-600 text-sm">{{ item.description }}</p>
+            <div class="bg-white shadow-lg rounded-lg p-6 mb-6 cursor-move relative flex flex-col items-center" cdkDrag>
+              <div class="w-full flex justify-between items-center mb-2">
+                <i class="fas fa-edit text-gray-600 cursor-pointer" (click)="showEditTaskModal(item)"></i>
+                <i class="fas fa-trash text-red-500 cursor-pointer" (click)="deleteTask(item, 'Inactive')"></i>
+              </div>
+              <div class="font-bold text-xl mb-2 text-center">{{ item.name | titlecase }}</div>
+              <p class="text-gray-600 text-base mb-2 text-center">{{ item.description }}</p>
+              <p class="text-gray-600 font-semibold text-lg text-center">Duration: {{ item.duration }} days</p>
+              <p class="text-gray-600 text-base mb-2 text-center">No of Team Members: {{ item.employeeIDs.length }}</p>
+
             </div>
           }
         </div>
@@ -81,9 +203,15 @@
           cdkDropList
           class="example-list border-2 border-transparent  min-h-1/2  ">
           @for (item of activeTasks; track item) {
-            <div class="bg-white shadow-lg rounded-lg p-4 mb-5 cursor-move " cdkDrag>
-              <div class="font-bold text-lg">{{ item.name |  titlecase }}</div>
-              <p class="text-gray-600 text-sm">{{ item.description }}</p>
+            <div class="bg-white shadow-lg rounded-lg p-6 mb-6 cursor-move relative flex flex-col items-center" cdkDrag>
+              <div class="w-full flex justify-between items-center mb-2">
+                <i class="fas fa-edit text-gray-600 cursor-pointer" (click)="showEditTaskModal(item)"></i>
+                <i class="fas fa-trash text-red-500 cursor-pointer" (click)="deleteTask(item, 'Active')"></i>
+              </div>
+              <div class="font-bold text-xl mb-2 text-center">{{ item.name | titlecase }}</div>
+              <p class="text-gray-600 text-base mb-2 text-center">{{ item.description }}</p>
+              <p class="text-gray-600 font-semibold text-lg text-center">Duration: {{ item.duration }} days</p>
+              <p class="text-gray-600 text-base mb-2 text-center">No of Team Members: {{ item.employeeIDs.length }}</p>
             </div>
           }
         </div>
@@ -102,10 +230,18 @@
           cdkDropList
           class="example-list border-2 border-transparent min-h-1/2">
           @for (item of completedTasks; track item) {
-            <div class="bg-white shadow-lg rounded-lg p-4 mb-5 cursor-move " cdkDrag>
-              <div class="font-bold text-lg">{{ item.name | titlecase }}</div>
-              <p class="text-gray-600 text-sm">{{ item.description }}</p>
+            <div class="bg-white shadow-lg rounded-lg p-6 mb-6 cursor-move relative flex flex-col items-center" cdkDrag>
+              <div class="w-full flex justify-between items-center mb-2">
+                <i class="fas fa-edit text-gray-600 cursor-pointer" (click)="showEditTaskModal(item)"></i>
+                <i class="fas fa-trash text-red-500 cursor-pointer" (click)="deleteTask(item, 'Completed')"></i>
+              </div>
+              <div class="font-bold text-xl mb-2 text-center">{{ item.name | titlecase }}</div>
+              <p class="text-gray-600 text-base mb-2 text-center">{{ item.description }}</p>
+              <p class="text-gray-600 font-semibold text-lg text-center">Duration: {{ item.duration }} days</p>
+              <p class="text-gray-600 text-base mb-2 text-center">No of Team Members: {{ item.employeeIDs.length }}</p>
+
             </div>
+
           }
         </div>
       </div>

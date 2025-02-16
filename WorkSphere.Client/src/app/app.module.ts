@@ -20,7 +20,7 @@ import {MatFormField, MatLabel} from '@angular/material/form-field';
 import {MatInput} from '@angular/material/input';
 import {EmployeeDetailsComponent} from './features/employees/components/employee-details/employee-details.component';
 import {Drawer} from 'primeng/drawer';
-import {Button} from 'primeng/button';
+import {Button, ButtonDirective} from 'primeng/button';
 import {providePrimeNG} from 'primeng/config';
 import Aura from '@primeng/themes/aura';
 import {MatBadge} from '@angular/material/badge';
@@ -52,6 +52,14 @@ import {
 import {TasksComponent} from './features/task/components/tasks/tasks.component';
 import {DropdownModule} from 'primeng/dropdown';
 import {CdkDrag, CdkDropList} from '@angular/cdk/drag-drop';
+import {TeamsComponent} from './features/team-managment/components/teams/teams.component';
+import {TeamDetailsComponent} from './features/team-managment/components/team-details/team-details.component';
+import {ManageTeamComponent} from './features/team-managment/components/manage-team/manage-team.component';
+import {Dialog} from "primeng/dialog";
+import {TextareaModule} from 'primeng/textarea';
+import { SalaryDetailsComponent } from './features/salary/components/salary-details/salary-details.component';
+import { ManageSalaryComponent } from './features/salary/components/manage-salary/manage-salary.component';
+import { SalariesComponent } from './features/salary/components/salaries/salaries.component';
 
 
 @NgModule({
@@ -72,6 +80,12 @@ import {CdkDrag, CdkDropList} from '@angular/cdk/drag-drop';
     ManageProjectManagerComponent,
     ProjectManagerDetailsComponent,
     TasksComponent,
+    TeamsComponent,
+    TeamDetailsComponent,
+    ManageTeamComponent,
+    SalaryDetailsComponent,
+    ManageSalaryComponent,
+    SalariesComponent,
 
   ],
   imports: [
@@ -99,6 +113,7 @@ import {CdkDrag, CdkDropList} from '@angular/cdk/drag-drop';
     FormsModule,
     Breadcrumb,
     DropdownModule,
+    TextareaModule,
     BrowserAnimationsModule,  // Required for Toastr
     ToastrModule.forRoot({
       positionClass: 'toast-top-center',
@@ -107,8 +122,9 @@ import {CdkDrag, CdkDropList} from '@angular/cdk/drag-drop';
     }),
     ConfirmDialogModule,
     CdkDropList,
-    CdkDrag
-
+    CdkDrag,
+    Dialog,
+    ButtonDirective
   ],
   providers: [
     provideHttpClient(),

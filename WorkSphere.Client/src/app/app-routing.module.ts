@@ -7,6 +7,7 @@ import {
   ProjectManagersComponent
 } from './features/project-manager/components/project-managers/project-managers.component';
 import {TasksComponent} from './features/task/components/tasks/tasks.component';
+import {TeamsComponent} from './features/team-managment/components/teams/teams.component';
 
 const routes: Routes = [
   {
@@ -41,6 +42,15 @@ const routes: Routes = [
   {
     path: 'tasks',
     component: TasksComponent
+  },
+  //team-management route
+  {
+    path: 'team-management',
+    component: TeamsComponent
+  },
+  {
+    path: 'team-management/:id',
+    component: TeamsComponent
   }
 
 ];

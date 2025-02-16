@@ -6,6 +6,7 @@ export class ProjectManager {
   firstName: string;
   lastName: string;
   email: string;
+  fullName?: string;
   employmentDate: Date | string;
   salaryID?: number;
   salary?: Salary;

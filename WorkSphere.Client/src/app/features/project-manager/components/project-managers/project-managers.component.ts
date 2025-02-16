@@ -1,11 +1,12 @@
 import {Component, Input, OnDestroy, OnInit} from '@angular/core';
 import {ConfirmationService, MenuItem} from 'primeng/api';
-import {firstValueFrom, Subject, Subscription, takeUntil} from 'rxjs';
+import {Subject, Subscription, takeUntil} from 'rxjs';
 import {ActivatedRoute, Router} from '@angular/router';
 import {ToastService} from '../../../../services/toast.service';
 import {ErrorHandlerService} from '../../../../core/services/error-handler.service';
 import {ProjectManager} from '../../model/project-manager';
 import {ProjectManagerService} from '../../services/project-manager.service';
+
 
 @Component({
   selector: 'app-project-managers',
@@ -24,13 +25,12 @@ export class ProjectManagersComponent implements OnInit, OnDestroy {
   selectedProjectManagerId: number | null = null;
   items: MenuItem[] = [];
   home: MenuItem = {label: 'Home', url: '/'};
-  readonly header = "Project Managers";
+  header = "Project Managers";
   pageIndex = 0;
   pageSize = 10;
   totalRecords = 0;
 
-  private deleteProjectManagerSubscription?: Subscription;
-  private routeDestroy$ = new Subject<void>();
+  private subscriptions: Subscription[] = [];
 
   constructor(
     private projectManagerService: ProjectManagerService,
@@ -44,14 +44,19 @@ export class ProjectManagersComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.handleRouteProjectManagerSelection();
+    this.projectManagerService.projectManagerResponse$.subscribe((response) => {
+      if (response) {
+        this.projectManagers = response.projectManagers;
+        this.totalRecords = response.totalCount;
+        this.pageIndex = response.pageIndex;
+        this.pageSize = response.pageSize;
+        this.isLoading = false;
+      }
+    })
   }
 
   ngOnDestroy(): void {
-    this.routeDestroy$.next(); // Unsubscribe from all observables
-    this.routeDestroy$.complete(); // Complete the subject
-    if (this.deleteProjectManagerSubscription) {
-      this.deleteProjectManagerSubscription.unsubscribe();
-    }
+    this.subscriptions.forEach(sub => sub.unsubscribe());
     this.showAddProjectManager = false;
     this.showDetailsProjectManager = false;
     this.selectedProjectManagerId = null;
@@ -68,40 +73,26 @@ export class ProjectManagersComponent implements OnInit, OnDestroy {
   }
 
   prevPage() {
-    this.pageIndex = this.pageIndex - 1;
-    this.loadProjectManagers();
+    if (this.pageIndex > 0) {
+      this.pageIndex--;
+      this.projectManagerService.getProjectManagers(this.pageIndex, this.pageSize);
+    }
   }
 
   nextPage() {
-    this.pageIndex = this.pageIndex + 1;
-    this.loadProjectManagers();
+    if ((this.pageIndex + 1) * this.pageSize < this.totalRecords) {
+      this.pageIndex++;
+      this.projectManagerService.getProjectManagers(this.pageIndex, this.pageSize);
+    }
   }
 
   handleDrawerVisibilityChange(isVisible: boolean) {
     this.showAddProjectManager = isVisible;
     if (!isVisible) {
-      this.loadProjectManagers(
-
-      ); // Reload projectManagers when the drawer is closed
+      this.projectManagerService.getProjectManagers(this.pageIndex, this.pageSize);
     }
   }
 
-  async loadProjectManagers() {
-    try {
-      //get all projectManagers
-      //firstValueFrom is used to convert an observable to a promise
-      const response = await firstValueFrom(this.projectManagerService.getProjectManagers(this.pageIndex, this.pageSize));
-      this.projectManagers = response.projectManagers;
-      this.pageIndex = response.pageIndex;
-      this.pageSize = response.pageSize;
-      this.totalRecords = response.totalCount;
-      this.isLoading = false;
-    } catch (error: any) {
-      this.errorHandlerService.apiErrorHandler(error);
-      this.isLoading = false;
-
-    }
-  }
 
   handleProjectManagerSelected(projectManager: ProjectManager): void {
     this.router.navigate(['/project-managers'], {queryParams: {id: projectManager.id}});
@@ -110,7 +101,7 @@ export class ProjectManagersComponent implements OnInit, OnDestroy {
   confirmDelete(event: Event, projectManagerId: number): void {
     this.confirmationService.confirm({
       target: event.target as EventTarget,
-      message: 'Do you want to delete this Project Manager?',
+      message: 'Do you want to delete this projectManager?',
       header: 'Delete Confirmation',
       icon: 'pi pi-info-circle',
       rejectLabel: 'Cancel',
@@ -129,6 +120,9 @@ export class ProjectManagersComponent implements OnInit, OnDestroy {
     });
   }
 
+  refetchProjectManagers() {
+    this.projectManagerService.refetchProjectManagers(0, 10);
+  }
 
   /**
    * Handles the route project selection
@@ -137,36 +131,48 @@ export class ProjectManagersComponent implements OnInit, OnDestroy {
    * @private
    */
   private handleRouteProjectManagerSelection(): void {
-    this.route.queryParams.pipe(takeUntil(this.routeDestroy$)).subscribe(params => {
-      const projectManagerId = parseInt(params['id'], 10);
-      if (projectManagerId) {
-        this.selectedProjectManagerId = projectManagerId;
-        this.showDetailsProjectManager = true
-        this.items = [{label: 'Project Managers', url: '/project-managers'}, {
-          label: `${projectManagerId}`,
-          url: '/project-managers',
-          queryParams: {id: projectManagerId}
-        }]
+    this.subscriptions.push(
+      this.route.queryParams.pipe(takeUntil(new Subject())).subscribe({
+        next: async (params) => {
+          if (params['id']) {
+            const projectManagerId = parseInt(params['id'], 10);
+            this.selectedProjectManagerId = projectManagerId;
+            this.showDetailsProjectManager = true;
+            this.selectedProjectManagerId = projectManagerId;
+            this.showDetailsProjectManager = true
+            this.items = [{label: 'Project Managers', url: '/project-managers'}, {
+              label: `${projectManagerId}`,
+              url: '/project-managers',
+              queryParams: {id: projectManagerId}
+            }]
 
-      } else {
-        this.loadProjectManagers();
-        this.showDetailsProjectManager = false
-        this.items = [{label: 'Project Managers', url: '/project-managers'}]
+          } else {
+            this.projectManagerService.getProjectManagers(this.pageIndex, this.pageSize);
+            this.showDetailsProjectManager = false
+            this.items = [{label: 'ProjectManagers', url: '/project-managers'}]
 
-      }
-    });
+          }
+        },
+        error: (error) => {
+          this.errorHandlerService.apiErrorHandler(error);
+        }
+      })
+    );
   }
 
   private deleteProjectManager(projectManagerId: number): void {
-    this.deleteProjectManagerSubscription = this.projectManagerService.deleteProjectManager(projectManagerId).subscribe({
-      next: () => {
-        this.toastService.showSuccess('ProjectManager Deleted');
-        this.pageIndex = 0;
-        this.loadProjectManagers();
-      },
-      error: (error) => {
-        this.errorHandlerService.apiErrorHandler(error);
-      }
-    });
+    this.subscriptions.push(
+      this.projectManagerService.deleteProjectManager(projectManagerId).subscribe({
+        next: () => {
+          this.toastService.showSuccess('ProjectManager Deleted');
+          this.pageIndex = 0;
+          this.refetchProjectManagers();
+        },
+        error: (error) => {
+          this.errorHandlerService.apiErrorHandler(error);
+        }
+      })
+    );
   }
+
 }

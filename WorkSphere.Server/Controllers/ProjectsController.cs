@@ -98,8 +98,8 @@ namespace WorkSphere.Server.Controllers
         {
             try
             {
-                _projectService.DeleteProjectAsync(id);
-                return Ok();
+                var deletedProject = await _projectService.DeleteProjectAsync(id);
+                return Ok(deletedProject);
             }
             catch (Exception ex)
             {

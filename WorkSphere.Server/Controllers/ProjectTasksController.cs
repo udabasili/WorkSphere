@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.CodeAnalysis;
+using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
+using WorkSphere.Data;
 using WorkSphere.Model;
 using WorkSphere.Server.Dtos;
 using WorkSphere.Server.Model;
@@ -14,11 +16,13 @@ namespace WorkSphere.Server.Controllers
     {
         private readonly IProjectTaskService _service;
         private readonly ILogger<ProjectTasksController> _logger;
+        private readonly WorkSphereDbContext _context;
 
-        public ProjectTasksController(IProjectTaskService service, ILogger<ProjectTasksController> logger)
+        public ProjectTasksController(IProjectTaskService service, ILogger<ProjectTasksController> logger, WorkSphereDbContext context)
         {
             _service = service;
             _logger = logger;
+            _context = context;
 
         }
 
@@ -28,31 +32,19 @@ namespace WorkSphere.Server.Controllers
         {
             var response = await _service.GetProjectTasksAsync(projectID);
             if (response == null || !response.ProjectTasks.Any())
-                return NotFound("No tasks found for this project.");
+                response = new ProjectTasksResponseDto
+                {
+                    ProjectTasks = new List<ProjectTaskDto>(),
+                    ProjectTeamMembers = new List<TeamMemberDto>()
+                };
 
             return Ok(response);
         }
 
 
-
-        //// GET: api/ProjectTasks/5
-        //[HttpGet("{id}")]
-        //public async Task<ActionResult<ProjectTask>> GetProjectTask(int id)
-        //{
-        //    var projectTask = await _context.ProjectTasks.FindAsync(id);
-
-        //    if (projectTask == null)
-        //    {
-        //        return NotFound();
-        //    }
-
-        //    return projectTask;
-        //}
-
         // PUT: api/ProjectTasks
         //the input is an array of project tasks
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-
         [HttpPut]
         public async Task<IActionResult> PutProjectTask(int projectID, [FromBody] UpdateProjectTasksDto updateDto)
         {
@@ -63,25 +55,89 @@ namespace WorkSphere.Server.Controllers
 
             try
             {
-                // ✅ Use ILogger for logging
                 _logger.LogInformation("Received request to update project tasks for ProjectID: {ProjectID}", projectID);
                 _logger.LogInformation("Tasks: {Tasks}", JsonConvert.SerializeObject(updateDto.Tasks));
+
+                var existingTasks = await _service.GetProjectTasksAsync(projectID);
+                var existingTaskIds = existingTasks.ProjectTasks.Select(t => t.Id).ToHashSet();
+
+                List<ProjectTask> tasksToUpdate = new List<ProjectTask>();
+                List<ProjectTask> tasksToAdd = new List<ProjectTask>();
+
+                foreach (var task in updateDto.Tasks)
+                {
+                    foreach (var employee in task.EmployeeIDs)
+                    {
+                        if (existingTaskIds.Contains(task.Id))
+                        {
+                            var existingTask = await _context.ProjectTasks
+                                .AsNoTracking()
+                                .FirstOrDefaultAsync(t => t.Id == task.Id && t.EmployeeID == employee);
+                            //remove the old employees from the task
+                            // Remove old employee-task assignments
+
+                            if (existingTask != null)
+                            {
+                                existingTask.EmployeeID = null;
+                                tasksToUpdate.Add(existingTask);
+                            }
+
+
+                            if (existingTask != null)
+                            {
+                                existingTask.Name = task.Name;
+                                existingTask.Description = task.Description;
+                                existingTask.ProjectID = task.ProjectID;
+                                existingTask.EmployeeID = employee;
+                                existingTask.Order = task.Order;
+                                existingTask.Status = Enum.Parse<Status>(task.Status);
+                                existingTask.Duration = task.Duration;
+                                tasksToUpdate.Add(existingTask);
+                            }
+                            else
+                            {
+                                tasksToAdd.Add(new ProjectTask
+                                {
+                                    Id = task.Id,
+                                    Name = task.Name,
+                                    Description = task.Description,
+                                    ProjectID = task.ProjectID,
+                                    EmployeeID = employee,
+                                    Order = task.Order,
+                                    Status = Enum.Parse<Status>(task.Status),
+                                    Duration = task.Duration
+                                });
+                            }
+                        }
+                        else
+                        {
+                            tasksToAdd.Add(new ProjectTask
+                            {
+                                Id = task.Id,
+                                Name = task.Name,
+                                Description = task.Description,
+                                ProjectID = task.ProjectID,
+                                EmployeeID = employee,
+                                Order = task.Order,
+                                Status = Enum.Parse<Status>(task.Status),
+                                Duration = task.Duration
+                            });
+                        }
+                    }
+                }
+
+                _context.ChangeTracker.Clear(); // Clear the change tracker to avoid tracking conflicts
+
+                _context.ProjectTasks.UpdateRange(tasksToUpdate);
+                //_context.ProjectTasks.AddRange(tasksToAdd);
+
+                await _context.SaveChangesAsync();
 
                 var projectTaskBulkInsertDto = new ProjectTaskBulkInsertDto
                 {
                     ProjectId = projectID,
-                    Tasks = updateDto.Tasks.Select(task => new ProjectTask
-                    {
-                        Id = task.Id,
-                        Name = task.Name,
-                        Description = task.Description,
-                        ProjectID = task.ProjectID,
-                        EmployeeID = task.EmployeeID,
-                        Order = task.Order,
-                        Status = Enum.Parse<Status>(task.Status) // Might throw an error
-                    }).ToList()
+                    Tasks = tasksToAdd
                 };
-
 
                 var response = await _service.BulkUpdateProjectTasks(projectTaskBulkInsertDto);
 
@@ -91,7 +147,6 @@ namespace WorkSphere.Server.Controllers
             {
                 _logger.LogError(ex, "Error updating project tasks for ProjectID: {ProjectID}", projectID);
 
-                // ✅ Log inner exception details
                 if (ex.InnerException != null)
                 {
                     _logger.LogError("Inner Exception: {InnerException}", ex.InnerException.Message);
@@ -100,6 +155,12 @@ namespace WorkSphere.Server.Controllers
                 return StatusCode(500, new { message = "An error occurred while updating the project tasks.", error = ex.Message });
             }
         }
+
+
+
+
+
+
 
 
         //// POST: api/ProjectTasks

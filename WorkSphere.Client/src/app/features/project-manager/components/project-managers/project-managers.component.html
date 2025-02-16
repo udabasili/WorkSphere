@@ -1,23 +1,22 @@
 <p-confirmdialog></p-confirmdialog>
 <section>
-  <app-activity [show]="isLoading"></app-activity>
   <app-section-header [home]="home" [items]="items" [title]="header"></app-section-header>
   <div
-    *ngIf="!showDetailsProjectManager"
     class="container bg-white shadow-md rounded-lg p-4 mt-4 overflow-x-auto ">
-    <div class="flex justify-between items-center">
+    <app-activity [show]="isLoading "></app-activity>
+    <div *ngIf="!showDetailsProjectManager || !isLoading" class="flex justify-between items-center">
       <div class="flex items center">
         <div class="example-button-container">
           <button
             (click)="openDrawer()"
             class="text-white bg-primary hover:opacity-75 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center me-2 cursor-pointer"
             type="button">
-            <span>Add Project Manager</span>
+            <span>Add Project</span>
           </button>
         </div>
       </div>
     </div>
-    <div class="flex flex-col mt-4">
+    <div *ngIf="!showDetailsProjectManager" class="flex flex-col mt-4">
       <table class="w-full text-sm text-left rtl:text-right text-gray-500 my-6">
         <thead class="text-xs text-gray-700 uppercase bg-gray-50 ">
         <tr>
@@ -100,7 +99,7 @@
   </div>
 </section>
 <app-manage-project-manager
-  (projectManagerSaved)="loadProjectManagers()"
+  (projectManagerSaved)="refetchProjectManagers()"
   (visibilityChange)="handleDrawerVisibilityChange($event)"
   *ngIf="showAddProjectManager"
   [projectManagerId]="selectedProjectManagerId"

@@ -1,7 +1,7 @@
 ﻿using WorkSphere.Server.Dtos;
 using WorkSphere.Server.Model;
 
-namespace WorkSphere.Server.Repository.Interface
+namespace WorkSphere.Server.Repository
 {
     public interface IProjectManagerRepo
     {

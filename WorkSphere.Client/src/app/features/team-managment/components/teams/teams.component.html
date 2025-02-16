@@ -1,0 +1,83 @@
+<p-confirmdialog></p-confirmdialog>
+<section>
+  <app-section-header [home]="home" [items]="items" [title]="header"></app-section-header>
+  <div
+    *ngIf="!showDetailsTeam"
+    class="container bg-white shadow-md rounded-lg p-4 mt-4 overflow-x-auto ">
+    <app-activity [show]="isLoading  "></app-activity>
+    <div
+      *ngIf=" !isLoading "
+    >
+      <div class="flex justify-between items-center">
+      </div>
+      <div class="flex flex-col mt-4">
+        <table class="w-full text-sm text-left rtl:text-right text-gray-500 my-6">
+          <thead class="text-xs text-gray-700 uppercase bg-gray-50 ">
+          <tr>
+            <th class="px-6 py-3" scope="col"> Project Name</th>
+            <th class="px-6 py-3" scope="col">Project Manager</th>
+            <th class="px-6 py-3" scope="col">No of Team Members</th>
+            <th class="px-6 py-3" scope="col">Completed Tasks</th>
+            <th class="px-6 py-3" scope="col">Pending Tasks</th>
+            <th class="px-6 py-3" scope="col"></th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr
+            *ngFor="let team of teams" class="bg-white border-b  border-gray-200">
+            <td class="px-6 py-4">{{ team.projectName }}</td>
+            <td class="px-6 py-4">{{ team.projectManager.fullName }}</td>
+            <td class="px-6 py-4">{{ team.teamMembers.length }}</td>
+            <td class="px-6 py-4">{{ team.numOfCompletedTasks }}</td>
+            <td class="px-6 py-4">{{ team.numOfPendingTasks }}</td>
+            <td class="px-6 py-4 flex items-center">
+              <button
+                (click)="handleTeamSelected(team.id)"
+                class="text-white bg-green-700 hover:bg-green-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center me-2 cursor-pointer"
+                type="button">
+                <span class="ms-2">View</span>
+              </button>
+            </td>
+          </tr>
+          </tbody>
+        </table>
+        <div *ngIf="!!teams.length" class="flex flex-col items-center">
+        <span class="text-sm text-gray-700 dark:text-gray-400">
+          Showing <span class="font-semibold text-gray-900 "> {{ pageIndex * pageSize + 1 }} </span>
+          to <span
+          class="font-semibold text-gray-900"> {{ ((pageIndex + 1) * pageSize) + pageSize < totalRecords ? ((pageIndex + 1) * pageSize) : totalRecords }} </span>
+          of <span class="font-semibold text-gray-900"> {{ totalRecords }}  </span> records
+        </span>
+          <div class="inline-flex mt-2 xs:mt-0">
+            <button
+              (click)="prevPage()"
+              class="flex items-center
+            justify-center px-3 h-8 text-sm font-medium
+            text-white rounded-s
+            font-medium text-white bg-[#4354BC]
+            disabled:bg-gray-300 disabled:cursor-not-allowed
+            "
+              disabled="{{pageIndex === 0 ? 'disabled' : ''}}">
+              Prev
+            </button>
+            <button
+              (click)="nextPage()"
+              class="flex items-center
+            cursor-pointer
+            justify-center px-3 h-8 text-sm
+            font-medium text-white bg-[#4354BC]
+            disabled:bg-gray-300 disabled:cursor-not-allowed
+            "
+              disabled="{{(pageIndex + 1) * pageSize >= totalRecords ? 'disabled' : ''}}">
+              Next
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<app-team-details
+  *ngIf="showDetailsTeam"
+  [teamId]="selectedTeamId"
+></app-team-details>

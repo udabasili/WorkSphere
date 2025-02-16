@@ -1,15 +1,16 @@
 import {Employee} from '../../employees/model/employee';
+import {ProjectManager} from '../../project-manager/model/project-manager';
 
-export class TeamManagement {
+export class Team {
 
   id: number;
   projectName: string;
   teamMembers: Employee[];
-  projectManager: string;
+  projectManager: ProjectManager;
   numOfCompletedTasks: number;
   numOfPendingTasks: number;
 
-  constructor(id: number, projectName: string, teamMembers: Employee[], projectManager: string, numOfCompletedTasks: number, numOfPendingTasks: number) {
+  constructor(id: number, projectName: string, teamMembers: Employee[], projectManager: ProjectManager, numOfCompletedTasks: number, numOfPendingTasks: number) {
     this.id = id;
     this.projectName = projectName;
     this.teamMembers = teamMembers;

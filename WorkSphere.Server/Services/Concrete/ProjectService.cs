@@ -39,10 +39,10 @@ namespace WorkSphere.Server.Services
             return await _projectRepo.UpdateProjectAsync(id, project);
         }
 
-        public async void DeleteProjectAsync(int projectId)
+        public async Task<Project> DeleteProjectAsync(int projectId)
         {
 
-            _projectRepo.DeleteProjectAsync(projectId);
+            return await _projectRepo.DeleteProjectAsync(projectId);
         }
 
 

@@ -15,8 +15,7 @@ namespace WorkSphere.Server.Services
 
         public Task<Project> UpdateProjectAsync(int id, Project project);
 
-        public void DeleteProjectAsync(int projectId);
-
+        public Task<Project> DeleteProjectAsync(int projectId);
 
     }
 }

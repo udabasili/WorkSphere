@@ -14,6 +14,6 @@ namespace WorkSphere.Server.Repository
 
         public Task<Project> UpdateProjectAsync(int? id, Project project);
 
-        public void DeleteProjectAsync(int projectId);
+        public Task<Project> DeleteProjectAsync(int projectId);
     }
 }

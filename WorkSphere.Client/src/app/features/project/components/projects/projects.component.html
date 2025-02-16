@@ -1,9 +1,9 @@
 <p-confirmdialog></p-confirmdialog>
 <section>
-  <app-activity [show]="isLoading"></app-activity>
   <app-section-header [home]="home" [items]="items" [title]="header"></app-section-header>
+  <app-activity [show]="isLoading"></app-activity>
   <div
-    *ngIf="!showDetailsProject"
+    *ngIf="!showDetailsProject || isLoading"
     class="container bg-white shadow-md rounded-lg p-4 mt-4 overflow-x-auto ">
     <div class="flex justify-between items-center">
       <div class="flex items center">
@@ -105,13 +105,12 @@
   </div>
 </section>
 <app-manage-project
-  (projectSaved)="loadProjects()"
+  (projectSaved)="refetchProjects()"
   (visibilityChange)="handleDrawerVisibilityChange($event)"
   *ngIf="showAddProject"
   [projectId]="selectedProjectId"
   [visible]="showAddProject"></app-manage-project>
 <app-project-details
-  (closeLoader)="closeLoader()"
   *ngIf="showDetailsProject"
   [isLoading]="isLoading"
   [projectId]="selectedProjectId"

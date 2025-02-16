@@ -2,7 +2,6 @@
 using WorkSphere.Data;
 using WorkSphere.Server.Dtos;
 using WorkSphere.Server.Model;
-using WorkSphere.Server.Repository.Interface;
 
 namespace WorkSphere.Server.Repository
 {

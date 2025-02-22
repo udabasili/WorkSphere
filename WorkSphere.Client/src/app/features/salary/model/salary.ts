@@ -1,18 +1,32 @@
+import {Employee} from '../../employees/model/employee';
+import {ProjectManager} from '../../project-manager/model/project-manager';
+
 export class Salary {
 
-  public id: number
-  public basicSalary: number
-  public bonus: number
-  public deductions: number
-  public totalSalary: number
-  public employeeID: number
+  id?: number;
+  employeeID?: number;
+  projectManagerID?: number;
+  employee?: Employee;
+  projectManager?: ProjectManager
+  basicSalary: number;
+  bonus: number;
+  deductions: number;
+  totalSalary: number;
+  createdAt?: Date;
+  updatedAt?: Date;
 
-  constructor(id: number, basicSalary: number, bonus: number, deductions: number, totalSalary: number, employeeID: number) {
-    this.id = id
-    this.basicSalary = basicSalary
-    this.bonus = bonus
-    this.deductions = deductions
-    this.totalSalary = totalSalary
-    this.employeeID = employeeID
+  constructor(data: any) {
+    this.id = data.id;
+    this.employeeID = data.employeeID;
+    this.projectManagerID = data.projectManagerID;
+    this.employee = data.employee;
+    this.projectManager = data.projectManager;
+    this.basicSalary = data.basicSalary;
+    this.bonus = data.bonus;
+    this.deductions = data.deductions;
+    this.totalSalary = data.totalSalary;
+    this.createdAt = data.createdAt;
+    this.updatedAt = data.updatedAt;
   }
+
 }

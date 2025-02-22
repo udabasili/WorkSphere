@@ -1,1 +1,50 @@
-<p>manage-salary works!</p>
+<div class="card flex justify-center bg-primary">
+  <div class="card flex justify-center ">
+    <p-drawer (onHide)="onClose()"
+              [(visible)]="visible" header="{{title}}"
+              position="right"
+              styleClass="!w-full md:!w-80 lg:!w-[30rem]"
+    >
+      <form #salaryForm="ngForm" (ngSubmit)="onFormSubmit(salaryForm)"
+            class="example-form w-full flex flex-col items-center">
+        
+        <p-iftalabel class="!w-4/5 md:!w-full mb-4">
+          <div class="flex items-center">
+            <input
+              #basicSalary="ngModel"
+              [(ngModel)]="salary.basicSalary"
+              [ngClass]="{
+            'p-invalid border-red-500':
+            (basicSalary.touched || basicSalary.dirty || salaryForm.submitted) &&
+            (basicSalary.hasError('required') || basicSalary.hasError( 'min'))
+    }"
+              class="w-full p-inputtext"
+              id="basicSalary"
+              min="0"
+              name="basicSalary"
+              pInputText
+              required
+              type="number"
+            />
+            <label for="basicSalary">Basic Salary</label>
+            <i
+              [class.visible]="(basicSalary.touched || basicSalary.dirty || salaryForm.submitted) &&
+                    (basicSalary.hasError('required') || basicSalary.hasError('min'))"
+              [title]="basicSalary.hasError('required') ? 'Basic Salary is required' : basicSalary.hasError('min') ? 'Minimum value for Basic Salary is ' + basicSalary.getError('min').min : ''"
+              class="fas fa-exclamation-circle err text-xl ml-2 text-red-700 invisible"
+            >
+            </i>
+          </div>
+        </p-iftalabel>
+
+        <div class="card flex justify-center gap-4">
+          <p-button
+            [loading]="buttonLoading"
+            icon="pi pi-check"
+            label="Submit"
+            type="submit"/>
+        </div>
+      </form>
+    </p-drawer>
+  </div>
+</div>

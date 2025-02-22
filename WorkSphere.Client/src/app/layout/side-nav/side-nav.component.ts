@@ -68,23 +68,10 @@ export class SideNavComponent implements OnInit {
     },
     {
       label: 'Salary Management',
-      icon: 'attach_money',
-      route: '',
+      route: '/salaries',
       role: ['Admin'],
-      children: [
-        {
-          label: 'Salaries',
-          icon: 'monetization_on',
-          route: '/salaries',
-          role: ['Admin'],
-        },
-        {
-          label: 'Payroll',
-          icon: 'payment',
-          route: '/payroll',
-          role: ['Admin'],
-        }
-      ]
+      icon: 'monetization_on',
+      children: null
     },
     {
       label: 'Communication',

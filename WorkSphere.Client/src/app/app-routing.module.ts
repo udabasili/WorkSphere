@@ -8,6 +8,7 @@ import {
 } from './features/project-manager/components/project-managers/project-managers.component';
 import {TasksComponent} from './features/task/components/tasks/tasks.component';
 import {TeamsComponent} from './features/team-managment/components/teams/teams.component';
+import {SalariesComponent} from './features/salary/components/salaries/salaries.component';
 
 const routes: Routes = [
   {
@@ -51,6 +52,15 @@ const routes: Routes = [
   {
     path: 'team-management/:id',
     component: TeamsComponent
+  },
+  //salary route
+  {
+    path: 'salaries',
+    component: SalariesComponent
+  },
+  {
+    path: 'salaries/:id',
+    component: SalariesComponent
   }
 
 ];

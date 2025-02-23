@@ -14,18 +14,16 @@ namespace WorkSphere.Server.Repository
         private readonly WorkSphereDbContext _context;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
-        private readonly RoleManager<IdentityRole> _roleManager;
 
         public LoginRepo(
             WorkSphereDbContext context,
             UserManager<ApplicationUser> userManager,
-            SignInManager<ApplicationUser> signInManager,
-            RoleManager<IdentityRole> roleManager)
+            SignInManager<ApplicationUser> signInManager
+            )
         {
             _context = context;
             _userManager = userManager;
             _signInManager = signInManager;
-            _roleManager = roleManager;
         }
 
 
@@ -70,6 +68,8 @@ namespace WorkSphere.Server.Repository
             return userDto;
 
         }
+
+
 
     }
 }

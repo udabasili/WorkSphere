@@ -17,21 +17,7 @@ namespace WorkSphere.Server.Repository.Concrete
 
         public async Task<PagedProjectsResponseDto> GetPagedProjectsAsync(int pageIndex = 0, int pageSize = 10)
         {
-            var projects = new List<Project>();
-            if (pageSize == 0)
-            {
-                projects = await _context.Projects
-               .Include(project => project.ProjectManager)
-               .Include(project => project.ProjectTasks)
-               .ToListAsync();
-
-            }
-            projects = await _context.Projects
-                .Include(project => project.ProjectManager)
-                .Include(project => project.ProjectTasks)
-                .Skip(pageIndex * pageSize)
-                .Take(pageSize)
-                .ToListAsync();
+            var projects = await GetProjects();
 
             var totalProjects = await GetTotalProjectCountAsync();
 
@@ -42,6 +28,17 @@ namespace WorkSphere.Server.Repository.Concrete
                 PageSize = pageSize,
                 TotalCount = totalProjects
             };
+        }
+
+        private async Task<List<Project>> GetProjects(int pageIndex = 0, int pageSize = 0)
+        {
+            if (pageSize == 0)
+            {
+                return await _context.Projects.ToListAsync();
+            }
+
+
+            return await _context.Projects.Skip(pageIndex * pageSize).Take(pageSize).ToListAsync();
         }
 
         public async Task<int> GetTotalProjectCountAsync()

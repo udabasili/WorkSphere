@@ -1,5 +1,4 @@
-﻿
-using WorkSphere.Server.Dtos;
+﻿using WorkSphere.Server.Dtos;
 using WorkSphere.Server.Repository;
 
 namespace WorkSphere.Server.Services
@@ -29,5 +28,6 @@ namespace WorkSphere.Server.Services
             return userDto;
 
         }
+
     }
 }

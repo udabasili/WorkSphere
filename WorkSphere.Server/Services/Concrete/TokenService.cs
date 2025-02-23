@@ -1,8 +1,10 @@
 ﻿
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using WorkSphere.Data;
 using WorkSphere.Server.Dtos;
 
 namespace WorkSphere.Server.Services
@@ -10,6 +12,7 @@ namespace WorkSphere.Server.Services
     public class TokenService : ITokenService
     {
         private readonly IConfiguration _configuration;
+        private readonly WorkSphereDbContext _context;
 
         /// <summary>
         /// Initializes a new instance of the IConfiguration class.
@@ -17,9 +20,10 @@ namespace WorkSphere.Server.Services
         /// The Setting was dne in the Program.cs file.
         /// </summary>
         /// <param name="configuration"></param>
-        public TokenService(IConfiguration configuration)
+        public TokenService(IConfiguration configuration, WorkSphereDbContext context)
         {
             _configuration = configuration;
+            _context = context;
         }
 
 
@@ -62,6 +66,59 @@ namespace WorkSphere.Server.Services
             //Write the token and return
             return tokenHandler.WriteToken(token);
 
+        }
+
+        public async Task<LoginOutputDto?> VerifyToken(string token)
+        {
+            if (string.IsNullOrEmpty(token))
+                return null;
+
+            string? jwtKey = _configuration["Jwt:Key"];
+            if (string.IsNullOrEmpty(jwtKey))
+                throw new InvalidOperationException("Jwt:Key is not configured.");
+
+            try
+            {
+                var tokenHandler = new JwtSecurityTokenHandler();
+                var key = Encoding.UTF8.GetBytes(jwtKey);
+
+                var validationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = false, // Change if needed
+                    ValidateAudience = false, // Change if needed
+                    ValidateLifetime = true, // Ensure token is not expired
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(key)
+                };
+
+                // Validate and decode token
+                ClaimsPrincipal principal = tokenHandler.ValidateToken(token, validationParameters, out SecurityToken validatedToken);
+
+                if (validatedToken is JwtSecurityToken jwtToken)
+                {
+                    var email = principal.Identity?.Name ?? "";
+                    var role = principal.FindFirst(ClaimTypes.Role)?.Value ?? "";
+                    var username = await _context.Users.Where(u => u.Email == email).Select(u => u.UserName).FirstOrDefaultAsync();
+
+                    return new LoginOutputDto
+                    {
+                        User = new UserDto
+                        {
+                            Email = email,
+                            Role = role,
+                            Username = username
+                        },
+                        Token = token,
+                        ExpiresIn = (int)(jwtToken.ValidTo - DateTime.UtcNow).TotalSeconds // Expiry in seconds
+                    };
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Token validation failed: {ex.Message}");
+            }
+
+            return null; // Invalid or expired token
         }
     }
 }

@@ -1,5 +1,4 @@
-﻿
-using WorkSphere.Server.Dtos;
+﻿using WorkSphere.Server.Dtos;
 
 namespace WorkSphere.Server.Services
 {
@@ -8,7 +7,7 @@ namespace WorkSphere.Server.Services
     /// </summary>
     public interface ILoginService
     {
+        public Task<UserDto> Login(LoginDto user);
 
-        Task<UserDto> Login(LoginDto user);
     }
 }

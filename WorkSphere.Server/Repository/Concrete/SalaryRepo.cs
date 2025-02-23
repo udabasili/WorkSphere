@@ -17,20 +17,28 @@ namespace WorkSphere.Server.Repository
         public async Task<PagedSalaryResponseDto> GetPagedSalariesAsync(int pageIndex = 0, int pageSize = 10)
         {
             var salaries = new List<Salary>();
-            if (pageIndex <= 0 || pageSize <= 0)
+            if (pageSize <= 0)
             {
                 salaries = await _context.Salaries
+               .Include(salary => salary.ProjectManager)
+               .Include(salary => salary.Employee)
+               .OrderBy(salary => salary.Employee != null ? salary.Employee.FirstName : salary.ProjectManager.FirstName)
+               .ToListAsync();
+                return new PagedSalaryResponseDto
+                {
+                    Salaries = salaries,
+                    PageIndex = pageIndex,
+                    PageSize = pageSize,
+                    TotalCount = salaries.Count
+                };
+            }
+
+            salaries = await _context.Salaries
                .Include(project => project.ProjectManager)
                .Include(project => project.Employee)
-               .ToListAsync();
-
-            }
-            salaries = await _context.Salaries
-           .Include(project => project.ProjectManager)
-           .Include(project => project.Employee)
-            .Skip(pageIndex * pageSize)
-            .Take(pageSize)
-            .ToListAsync();
+                .Skip(pageIndex * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
 
             var totalProjects = await GetTotalSalariesCountAsync();
 
@@ -105,8 +113,6 @@ namespace WorkSphere.Server.Repository
         {
             return _context.Salaries.Any(e => e.Id == id);
         }
-
-
     }
 
 }

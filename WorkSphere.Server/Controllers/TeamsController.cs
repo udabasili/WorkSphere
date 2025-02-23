@@ -1,4 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using TastyTreats.Model.Entities;
+using TastyTreats.Types;
 using WorkSphere.Server.Dtos;
 using WorkSphere.Server.Services;
 
@@ -29,15 +31,8 @@ namespace WorkSphere.Server.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error getting teams");
-                return StatusCode(500, new
-                {
-                    type = "https://tools.ietf.org/html/rfc7231#section-6.6.1",
-                    title = "Internal Server Error",
-                    status = 500,
-                    detail = ex.Message,
-                    traceId = HttpContext.TraceIdentifier
-                });
+                _logger.LogError(ex.Message);
+                return ErrorHandling.HandleException(ex, HttpContext);
             }
         }
 
@@ -48,21 +43,30 @@ namespace WorkSphere.Server.Controllers
         {
             try
             {
+                List<ValidationError> errors = new();
+                if (id <= 0)
+                {
+                    errors.Add(new ValidationError(
+                        "ID must be greater than 0",
+                        ErrorType.Model
+                    ));
+                    return BadRequest(new
+                    {
+                        type = "https://tools.ietf.org/html/rfc7231#section-6.5.1",
+                        title = "Bad Request",
+                        status = 400,
+                        errors,
+                        traceId = HttpContext.TraceIdentifier
+                    });
+                }
                 var response = await _teamService.GetTeamById(id);
                 _logger.LogInformation("Team retrieved successfully");
                 return Ok(response);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error getting team");
-                return StatusCode(500, new
-                {
-                    type = "https://tools.ietf.org/html/rfc7231#section-6.6.1",
-                    title = "Internal Server Error",
-                    status = 500,
-                    detail = ex.Message,
-                    traceId = HttpContext.TraceIdentifier
-                });
+                _logger.LogError(ex.Message);
+                return ErrorHandling.HandleException(ex, HttpContext);
             }
         }
 
@@ -71,21 +75,29 @@ namespace WorkSphere.Server.Controllers
         {
             try
             {
-
+                List<ValidationError> errors = new();
+                if (updateTeamDto == null)
+                {
+                    errors.Add(new ValidationError(
+                        "Request body cannot be null",
+                        ErrorType.Model
+                    ));
+                    return BadRequest(new
+                    {
+                        type = "https://tools.ietf.org/html/rfc7231#section-6.5.1",
+                        title = "Bad Request",
+                        status = 400,
+                        errors,
+                        traceId = HttpContext.TraceIdentifier
+                    });
+                }
                 var response = await _teamService.UpdateTeamAsync(updateTeamDto);
                 return Ok(response);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error getting team");
-                return StatusCode(500, new
-                {
-                    type = "https://tools.ietf.org/html/rfc7231#section-6.6.1",
-                    title = "Internal Server Error",
-                    status = 500,
-                    detail = ex.Message,
-                    traceId = HttpContext.TraceIdentifier
-                });
+                _logger.LogError(ex.Message);
+                return ErrorHandling.HandleException(ex, HttpContext);
             }
         }
 

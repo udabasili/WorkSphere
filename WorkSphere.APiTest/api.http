@@ -1,0 +1,36 @@
+### Get an Employee by ID
+GET https://worksphereserver.azurewebsites.net/api/employees/{{id}}
+Accept: application/json
+
+### Create a New Employee
+POST https://worksphereserver.azurewebsites.net/api/employees
+Content-Type: application/json
+
+{
+  "firstName": "John",
+  "lastName": "Doe",
+  "email": "johndoe@example.com",
+  "employmentDate": "2025-02-22",
+  "salaryID": 1
+}
+
+### Update an Employee
+PUT https://worksphereserver.azurewebsites.net/api/employees/{{id}}
+Content-Type: application/json
+
+{
+  "id": {{id}},
+  "firstName": "John",
+  "lastName": "Doe",
+  "email": "johndoe@example.com",
+  "employmentDate": "2025-02-22",
+  "salaryID": 1
+}
+
+### Delete an Employee
+DELETE https://worksphereserver.azurewebsites.net/api/employees/{{id}}
+Accept: application/json
+
+### Fetch Employees with Pagination
+GET https://worksphereserver.azurewebsites.net/api/employees?pageIndex=1&pageSize=10
+Accept: application/json

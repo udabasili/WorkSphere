@@ -316,3 +316,6 @@ testem.log
 .DS_Store
 Thumbs.db
 /WorkSphere.Server/Logs
+
+# Local Netlify folder
+.netlify

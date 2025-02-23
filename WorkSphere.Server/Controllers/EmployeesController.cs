@@ -1,4 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using TastyTreats.Model.Entities;
+using TastyTreats.Types;
+using WorkSphere.Server.Dtos;
 using WorkSphere.Server.Model;
 using WorkSphere.Server.Services;
 
@@ -21,7 +24,7 @@ namespace WorkSphere.Server.Controllers
 
         // GET: api/Employees
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Employee>>> GetEmployees(int pageIndex, int pageSize)
+        public async Task<ActionResult<PagedEmployeeResponseDto>> GetEmployees(int pageIndex, int pageSize)
         {
 
             try
@@ -31,9 +34,10 @@ namespace WorkSphere.Server.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error getting employees");
-                return StatusCode(500, ex.Message);
+                return ErrorHandling.HandleException(ex, HttpContext);
+
             }
+
         }
 
 
@@ -42,37 +46,53 @@ namespace WorkSphere.Server.Controllers
         {
             try
             {
+                List<ValidationError> errors = new();
+
                 if (id <= 0)
                 {
+                    errors.Add(new ValidationError(
+                        "ID must be greater than 0",
+                        ErrorType.Model
+                    ));
                     return BadRequest(new
                     {
                         type = "https://tools.ietf.org/html/rfc7231#section-6.5.1",
                         title = "Bad Request",
                         status = 400,
-                        errors = new { id = new[] { "ID must be greater than 0" } },
+                        errors,
                         traceId = HttpContext.TraceIdentifier
                     });
                 }
                 var employee = await _employeeService.GetEmployee(id);
                 if (employee == null)
                 {
+                    errors.Add(new ValidationError(
+                        $"Employee with ID {id} not found.",
+                        ErrorType.Model
+                    ));
                     return NotFound(new
                     {
                         type = "https://tools.ietf.org/html/rfc7231#section-6.5.4",
                         title = "Not Found",
                         status = 404,
-                        errors = new { id = new[] { $"Employee with ID {id} not found." } },
+                        errors,
                         traceId = HttpContext.TraceIdentifier
                     });
                 }
                 if (employee.Errors.Count > 0)
                 {
+                    errors.Add(new ValidationError
+                    {
+                        Description = "Employee not found",
+                        ErrorType = ErrorType.Model
+                    });
                     return BadRequest(new
                     {
+
                         type = "https://tools.ietf.org/html/rfc7231#section-6.5.1",
                         title = "Bad Request",
                         status = 400,
-                        errors = employee.Errors.ToDictionary(e => e.ErrorType.ToString(), e => new[] { e.Description }),
+                        errors,
                         traceId = HttpContext.TraceIdentifier
                     });
                 }
@@ -80,16 +100,9 @@ namespace WorkSphere.Server.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error getting employee");
-                return StatusCode(500, new
-                {
-                    type = "https://tools.ietf.org/html/rfc7231#section-6.6.1",
-                    title = "Internal Server Error",
-                    status = 500,
-                    errors = new { message = new[] { ex.Message } },
-                    traceId = HttpContext.TraceIdentifier
-                });
+                return ErrorHandling.HandleException(ex, HttpContext);
             }
+
         }
 
         // PUT: api/Employees/5
@@ -97,14 +110,21 @@ namespace WorkSphere.Server.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> PutEmployee(int id, Employee employee)
         {
+
+            List<ValidationError> errors = new();
             if (id != employee.Id)
             {
+                errors.Add(new ValidationError
+                {
+                    Description = "ID in the URL does not match ID in the body",
+                    ErrorType = ErrorType.Model
+                });
                 return BadRequest(new
                 {
                     type = "https://tools.ietf.org/html/rfc7231#section-6.5.1",
                     title = "Bad Request",
                     status = 400,
-                    errors = new { id = new[] { "ID in the URL does not match ID in the body" } },
+                    errors,
                     traceId = HttpContext.TraceIdentifier
                 });
             }
@@ -113,24 +133,34 @@ namespace WorkSphere.Server.Controllers
                 var updatedEmployee = await _employeeService.UpdateEmployee(id, employee);
                 if (updatedEmployee == null)
                 {
+                    errors.Add(new ValidationError
+                    {
+                        Description = $"Employee with ID {id} not found.",
+                        ErrorType = ErrorType.Model
+                    });
                     return NotFound(new
                     {
                         type = "https://tools.ietf.org/html/rfc7231#section-6.5.4",
                         title = "Not Found",
                         status = 404,
-                        errors = new { id = new[] { $"Employee with ID {id} not found." } },
+                        errors,
                         traceId = HttpContext.TraceIdentifier
                     });
                 }
                 if (updatedEmployee.Errors.Count > 0)
 
                 {
+                    errors.Add(new ValidationError
+                    {
+                        Description = "Employee not found",
+                        ErrorType = ErrorType.Model
+                    });
                     return BadRequest(new
                     {
                         type = "https://tools.ietf.org/html/rfc7231#section-6.5.1",
                         title = "Bad Request",
                         status = 400,
-                        errors = updatedEmployee.Errors.ToDictionary(e => e.ErrorType.ToString(), e => new[] { e.Description }),
+                        errors,
                         traceId = HttpContext.TraceIdentifier
                     });
                 }
@@ -138,15 +168,9 @@ namespace WorkSphere.Server.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error updating employee");
-                return StatusCode(500, new
-                {
-                    type = "https://tools.ietf.org/html/rfc7231#section-6.6.1",
-                    title = "Internal Server Error",
-                    status = 500,
-                    errors = new { message = new[] { ex.Message } },
-                    traceId = HttpContext.TraceIdentifier
-                });
+                _logger.LogError(ex.Message);
+                return ErrorHandling.HandleException(ex, HttpContext);
+
             }
         }
 
@@ -157,15 +181,21 @@ namespace WorkSphere.Server.Controllers
         {
             try
             {
+                List<ValidationError> errors = new();
                 var newEmployee = await _employeeService.AddEmployee(employee);
                 if (newEmployee.Errors.Any())
                 {
+                    errors.Add(new ValidationError
+                    {
+                        Description = "Employee not found",
+                        ErrorType = ErrorType.Model
+                    });
                     return BadRequest(new
                     {
                         type = "https://tools.ietf.org/html/rfc7231#section-6.5.1",
                         title = "Bad Request",
                         status = 400,
-                        errors = newEmployee.Errors.ToDictionary(e => e.ErrorType.ToString(), e => new[] { e.Description }),
+                        errors,
                         traceId = HttpContext.TraceIdentifier
                     });
                 }
@@ -173,15 +203,8 @@ namespace WorkSphere.Server.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error adding employee");
-                return StatusCode(500, new
-                {
-                    type = "https://tools.ietf.org/html/rfc7231#section-6.6.1",
-                    title = "Internal Server Error",
-                    status = 500,
-                    errors = new { message = new[] { ex.Message } },
-                    traceId = HttpContext.TraceIdentifier
-                });
+                _logger.LogError(ex.Message);
+                return ErrorHandling.HandleException(ex, HttpContext);
             }
         }
 
@@ -191,17 +214,23 @@ namespace WorkSphere.Server.Controllers
         public async Task<IActionResult> DeleteEmployee(int id)
         {
 
+            List<ValidationError> errors = new();
             try
             {
                 var employee = await _employeeService.DeleteEmployee(id);
                 if (employee == null)
                 {
+                    errors.Add(new ValidationError
+                    {
+                        Description = $"Employee with ID {id} not found.",
+                        ErrorType = ErrorType.Model
+                    });
                     return NotFound(new
                     {
                         type = "https://tools.ietf.org/html/rfc7231#section-6.5.4",
                         title = "Not Found",
                         status = 404,
-                        detail = $"Employee with ID {id} not found.",
+                        errors,
                         traceId = HttpContext.TraceIdentifier
                     });
                 }
@@ -209,15 +238,8 @@ namespace WorkSphere.Server.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error deleting employee");
-                return StatusCode(500, new
-                {
-                    type = "https://tools.ietf.org/html/rfc7231#section-6.6.1",
-                    title = "Internal Server Error",
-                    status = 500,
-                    detail = ex.Message,
-                    traceId = HttpContext.TraceIdentifier
-                });
+                _logger.LogError(ex.Message);
+                return ErrorHandling.HandleException(ex, HttpContext);
             }
         }
 

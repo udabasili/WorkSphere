@@ -1,7 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Text.Json.Serialization;
 using WorkSphere.Model;
 
 namespace WorkSphere.Server.Model
@@ -25,13 +24,13 @@ namespace WorkSphere.Server.Model
         // One-to-One: Salary is tied to an Employee
         public int? EmployeeID { get; set; }
 
-        [JsonIgnore]
+        // [JsonIgnore]
         public virtual Employee? Employee { get; set; }
 
         // One-to-One: Salary is tied to a Project Manager
         public int? ProjectManagerID { get; set; }
 
-        [JsonIgnore]
+        // [JsonIgnore]
         public virtual ProjectManager? ProjectManager { get; set; }
     }
 }

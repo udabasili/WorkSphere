@@ -3,6 +3,7 @@ using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 using Serilog.Events;
+using System.Text.Json.Serialization;
 using WorkSphere.Data;
 using WorkSphere.Server.Data;
 using WorkSphere.Server.Model;
@@ -39,7 +40,7 @@ namespace WorkSphere.Server
                 options.AddPolicy(name: MyAllowSpecificOrigins,
                                   policy =>
                                   {
-                                      policy.WithOrigins("http://127.0.0.1:4200", "http://localhost:4200") // Explicitly allow the frontend origin
+                                      policy.WithOrigins("http://127.0.0.1:4200", "http://localhost:4200", "https://work-sphere-app.netlify.app/", "https://work-sphere-app.netlify.app/") // Explicitly allow the frontend origin
                                             .AllowAnyHeader() // Allow any headers
                                             .AllowAnyMethod(); // Allow any HTTP methods (GET, POST, etc.)
                                   });
@@ -58,8 +59,8 @@ namespace WorkSphere.Server
             else
             {
                 var conStrBuilder = new SqlConnectionStringBuilder(
-                    builder.Configuration.GetConnectionString("ProductionConnection"));
-                conStrBuilder.Password = builder.Configuration["Database:password"];
+                builder.Configuration.GetConnectionString("ProductionConnection"));
+                // conStrBuilder.Password = builder.Configuration["Database:password"];
                 var connection = conStrBuilder.ConnectionString;
 
                 builder.Services.AddDbContext<WorkSphereDbContext>(options =>
@@ -67,6 +68,7 @@ namespace WorkSphere.Server
                         .UseSqlServer(connection)
                 );
             }
+
 
 
 
@@ -91,14 +93,27 @@ namespace WorkSphere.Server
             builder.Services.AddIdentityCore<EmployeeUser>().AddEntityFrameworkStores<WorkSphereDbContext>();
             builder.Services.AddIdentityCore<ProjectManagerUser>().AddEntityFrameworkStores<WorkSphereDbContext>();
 
-
             // Add services to the container.
 
-            builder.Services.AddControllers();
+            builder.Services.AddControllers()
+                .AddJsonOptions(options =>
+                {
+                    //we need to add this ignore cyclic error
+                    options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
 
-            // Configure Swagger
+                });
+
+
+            //// Add services to the container.
+
+            //builder.Services.AddControllers();
+
+            // Configure Swagger only
+
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
+
+
 
             //Add DI  
             // Register Repositories
@@ -107,6 +122,7 @@ namespace WorkSphere.Server
             builder.Services.AddScoped<IEmployeeRepo, EmployeeRepo>();
             builder.Services.AddScoped<ITeamRepo, TeamRepo>();
             builder.Services.AddScoped<IProjectManagerRepo, ProjectManagerRepo>();
+            builder.Services.AddScoped<ISalaryRepo, SalaryRepo>();
 
             // Register Services
             builder.Services.AddScoped<IProjectService, ProjectService>();
@@ -114,6 +130,7 @@ namespace WorkSphere.Server
             builder.Services.AddScoped<IEmployeeService, EmployeeService>();
             builder.Services.AddScoped<ITeamService, TeamService>();
             builder.Services.AddScoped<IProjectManagerService, ProjectManagerService>();
+            builder.Services.AddScoped<ISalaryService, SalaryService>();
 
             // Register AutoMapper
             builder.Services.AddAutoMapper(typeof(MappingProfile));
@@ -146,11 +163,9 @@ namespace WorkSphere.Server
             app.UseDefaultFiles();
             app.UseStaticFiles();
 
-            if (app.Environment.IsDevelopment())
-            {
-                app.UseSwagger();
-                app.UseSwaggerUI();
-            }
+            app.UseSwagger();
+            app.UseSwaggerUI();
+
 
 
             // Configure the HTTP request pipeline.

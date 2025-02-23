@@ -1,4 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using TastyTreats.Model.Entities;
+using TastyTreats.Types;
 using WorkSphere.Server.Model;
 using WorkSphere.Server.Services;
 
@@ -29,8 +31,8 @@ namespace WorkSphere.Server.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error getting projectManagers");
-                return StatusCode(500, ex.Message);
+                _logger.LogError(ex.Message);
+                return ErrorHandling.HandleException(ex, HttpContext);
             }
         }
 
@@ -40,26 +42,36 @@ namespace WorkSphere.Server.Controllers
         {
             try
             {
+                List<ValidationError> errors = new();
+
                 if (id <= 0)
                 {
+                    errors.Add(new ValidationError(
+                        "ID must be greater than 0",
+                        ErrorType.Model
+                    ));
                     return BadRequest(new
                     {
                         type = "https://tools.ietf.org/html/rfc7231#section-6.5.1",
                         title = "Bad Request",
                         status = 400,
-                        errors = new { id = new[] { "ID must be greater than 0" } },
+                        errors,
                         traceId = HttpContext.TraceIdentifier
                     });
                 }
                 var projectManager = await _projectManagerService.GetProjectManager(id);
                 if (projectManager == null)
                 {
+                    errors.Add(new ValidationError(
+                        $"ProjectManager with ID {id} not found",
+                        ErrorType.Model
+                    ));
                     return NotFound(new
                     {
                         type = "https://tools.ietf.org/html/rfc7231#section-6.5.4",
                         title = "Not Found",
                         status = 404,
-                        errors = new { id = new[] { $"ProjectManager with ID {id} not found." } },
+                        errors,
                         traceId = HttpContext.TraceIdentifier
                     });
                 }
@@ -67,15 +79,8 @@ namespace WorkSphere.Server.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error getting projectManager");
-                return StatusCode(500, new
-                {
-                    type = "https://tools.ietf.org/html/rfc7231#section-6.6.1",
-                    title = "Internal Server Error",
-                    status = 500,
-                    errors = new { message = new[] { ex.Message } },
-                    traceId = HttpContext.TraceIdentifier
-                });
+                _logger.LogError(ex.Message);
+                return ErrorHandling.HandleException(ex, HttpContext);
             }
         }
 
@@ -87,26 +92,36 @@ namespace WorkSphere.Server.Controllers
 
             try
             {
+                List<ValidationError> errors = new();
+
                 if (id != projectManager.Id)
                 {
+                    errors.Add(new ValidationError(
+                        "ID mismatch",
+                        ErrorType.Model
+                    ));
                     return BadRequest(new
                     {
                         type = "https://tools.ietf.org/html/rfc7231#section-6.5.1",
                         title = "Bad Request",
                         status = 400,
-                        errors = new { id = new[] { "ID mismatch" } },
+                        errors,
                         traceId = HttpContext.TraceIdentifier
                     });
                 }
                 var updatedProjectManager = await _projectManagerService.UpdateProjectManager(id, projectManager);
                 if (updatedProjectManager.Errors.Count > 0)
                 {
+                    errors.Add(new ValidationError(
+                        "ProjectManager not found",
+                        ErrorType.Model
+                    ));
                     return BadRequest(new
                     {
                         type = "https://tools.ietf.org/html/rfc7231#section-6.5.1",
                         title = "Bad Request",
                         status = 400,
-                        errors = updatedProjectManager.Errors.ToDictionary(e => e.ErrorType.ToString(), e => new[] { e.Description }),
+                        errors,
                         traceId = HttpContext.TraceIdentifier
                     });
                 }
@@ -114,15 +129,8 @@ namespace WorkSphere.Server.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error updating projectManager");
-                return StatusCode(500, new
-                {
-                    type = "https://tools.ietf.org/html/rfc7231#section-6.6.1",
-                    title = "Internal Server Error",
-                    status = 500,
-                    errors = new { message = new[] { ex.Message } },
-                    traceId = HttpContext.TraceIdentifier
-                });
+                _logger.LogError(ex.Message);
+                return ErrorHandling.HandleException(ex, HttpContext);
             }
         }
 
@@ -134,6 +142,7 @@ namespace WorkSphere.Server.Controllers
 
             try
             {
+                List<ValidationError> errors = new();
                 if (projectManager == null)
                 {
                     return BadRequest(new
@@ -141,19 +150,23 @@ namespace WorkSphere.Server.Controllers
                         type = "https://tools.ietf.org/html/rfc7231#section-6.5.1",
                         title = "Bad Request",
                         status = 400,
-                        errors = new { id = new[] { "ProjectManager is null" } },
+                        errors,
                         traceId = HttpContext.TraceIdentifier
                     });
                 }
                 var newProjectManager = await _projectManagerService.AddProjectManager(projectManager);
                 if (newProjectManager.Errors.Count > 0)
                 {
+                    errors.Add(new ValidationError(
+                        "ProjectManager not found",
+                        ErrorType.Model
+                    ));
                     return BadRequest(new
                     {
                         type = "https://tools.ietf.org/html/rfc7231#section-6.5.1",
                         title = "Bad Request",
                         status = 400,
-                        errors = newProjectManager.Errors.ToDictionary(e => e.ErrorType.ToString(), e => new[] { e.Description }),
+                        errors,
                         traceId = HttpContext.TraceIdentifier
                     });
                 }
@@ -161,15 +174,8 @@ namespace WorkSphere.Server.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error adding projectManager");
-                return StatusCode(500, new
-                {
-                    type = "https://tools.ietf.org/html/rfc7231#section-6.6.1",
-                    title = "Internal Server Error",
-                    status = 500,
-                    errors = new { message = new[] { ex.Message } },
-                    traceId = HttpContext.TraceIdentifier
-                });
+                _logger.LogError(ex.Message);
+                return ErrorHandling.HandleException(ex, HttpContext);
             }
         }
 
@@ -180,15 +186,20 @@ namespace WorkSphere.Server.Controllers
 
             try
             {
+                List<ValidationError> errors = new();
                 var projectManager = await _projectManagerService.DeleteProjectManager(id);
                 if (projectManager == null)
                 {
+                    errors.Add(new ValidationError(
+                        $"ProjectManager with ID {id} not found",
+                        ErrorType.Model
+                    ));
                     return NotFound(new
                     {
                         type = "https://tools.ietf.org/html/rfc7231#section-6.5.4",
                         title = "Not Found",
                         status = 404,
-                        errors = new { id = new[] { $"ProjectManager with ID {id} not found." } },
+                        errors,
                         traceId = HttpContext.TraceIdentifier
                     });
                 }
@@ -196,15 +207,8 @@ namespace WorkSphere.Server.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error deleting projectManager");
-                return StatusCode(500, new
-                {
-                    type = "https://tools.ietf.org/html/rfc7231#section-6.6.1",
-                    title = "Internal Server Error",
-                    status = 500,
-                    errors = new { message = new[] { ex.Message } },
-                    traceId = HttpContext.TraceIdentifier
-                });
+                _logger.LogError(ex.Message);
+                return ErrorHandling.HandleException(ex, HttpContext);
             }
         }
 

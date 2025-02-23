@@ -11,11 +11,11 @@
         Your project management hub
       </p>
     </div>
-    <div class="w-3/4 md:w-1/2 bg-primary p-8 flex flex-col justify-center md:h-full ">
+    <div class="w-[90%] md:w-1/2 bg-primary p-8 flex flex-col justify-center items-center md:h-full ">
       <div class="flex justify-center mb-6">
         <h1 class="text-2xl font-bold text-heading text-white">Login</h1>
       </div>
-      <div class=" justify-self-center self-center my-3">
+      <div class=" justify-self-center self-center my-10">
         <p-button
           (click)="setAdminLogin(loginForm)"
           class="w-full mt-6 p-button-rounded p-button-primary"
@@ -24,8 +24,8 @@
           type="button"
         />
       </div>
-      <form #loginForm="ngForm" (ngSubmit)="onSubmit(loginForm)" class="space-y-6">
-        <div class="flex flex-col">
+      <form #loginForm="ngForm" (ngSubmit)="onSubmit(loginForm)" class="space-y-6 w-full flex flex-col items-center">
+        <div class="flex flex-col w-full">
           <label class="text-sm font-medium text-white" for="email">Email</label>
           <input
             #email="ngModel"
@@ -39,7 +39,7 @@
             type="email"
           />
         </div>
-        <div class="flex flex-col">
+        <div class="flex flex-col w-full">
           <label class="text-sm font-medium text-white" for="password">Password</label>
           <input
             #password="ngModel"

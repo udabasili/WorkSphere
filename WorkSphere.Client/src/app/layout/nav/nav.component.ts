@@ -32,7 +32,7 @@ export class NavComponent implements OnInit, OnDestroy {
     const sideNav = document.getElementById('side-nav');
     console.log(sideNav, window.innerWidth)
     if (sideNav && window.innerWidth < 768) {
-      sideNav.style.width = '50vw';
+      sideNav.style.width = '100vw';
     }
   }
 

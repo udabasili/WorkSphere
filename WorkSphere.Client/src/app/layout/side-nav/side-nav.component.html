@@ -31,7 +31,7 @@
           (click)="setActiveItem(link.route)"
           *ngIf="!link.children"
           [routerLink]="link.route"
-          class="flex items-center space-x-4 mb-2 rounded-lg cursor-pointer w-[4/5] justify-stretch py-3 px-2.5 {{link.route === activeItem ? 'text-black bg-white' : ''}}">
+          class="flex items-center space-x-4 mb-2 rounded-lg cursor-pointer w-full justify-stretch py-3 px-2.5 {{link.route === activeItem ? 'text-black bg-white' : ''}}">
           <mat-icon
             aria-hidden="false"
             aria-label="Example home icon"
@@ -46,20 +46,24 @@
           rounded-lg -[4/5] justify-stretch py-3 px-2.5
         }}">
           <span class="md:hidden lg:flex font-semibold text-heading">{{ link.label }}</span>
-          <mat-icon
-            aria-hidden="false"
-            aria-label="Example arrow icon"
-            class="flex items-center"
-            fontIcon="arrow_drop_down">
-          </mat-icon>
+          <span class="flex md:hidden lg:flex items-center">
+            <mat-icon
+              aria-hidden="false"
+              aria-label="Example arrow icon"
+              class="hidden md:flex items-center"
+              fontIcon="arrow_drop_down">
+            </mat-icon>
+          </span>
+
+
         </span>
-        <ul *ngIf="link?.children && link?.children.length > 0" class="pl-6">
+        <ul *ngIf="link?.children && link?.children.length > 0" class="pl-6 md:pl-0 lg:pl-6 w-full">
           <li *ngFor="let child of link?.children">
             <a
               (click)="setActiveItem(child.route)"
               [ngClass]="{'text-black bg-white': child.route === activeItem}"
               [routerLink]="child.route"
-              class="flex items-center space-x-4 mb-2 rounded-lg cursor-pointer w-4/5 justify-stretch py-3 px-2.5">
+              class="flex items-center space-x-4 mb-2 rounded-lg cursor-pointer w-4/5 md:w-full lg:w-4/5 justify-stretch py-3 px-2.5">
               <mat-icon
                 [fontIcon]="child.icon"
                 aria-hidden="false"
@@ -67,8 +71,8 @@
                 class="flex items-center">
               </mat-icon>
               <span class="md:hidden lg:flex font-semibold text-heading text-md">
-    {{ child.label }}
-  </span>
+                {{ child.label }}
+              </span>
             </a>
           </li>
         </ul>

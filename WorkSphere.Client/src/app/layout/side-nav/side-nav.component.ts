@@ -32,7 +32,7 @@ export class SideNavComponent implements OnInit {
           role: ['Admin'], // Only Admin can manage employees
         },
         {
-          label: 'Project Managers',
+          label: 'Managers',
           icon: 'person',
           route: '/project-managers',
           role: ['Admin'], // Only Admin can manage project managers

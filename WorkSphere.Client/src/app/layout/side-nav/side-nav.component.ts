@@ -58,7 +58,7 @@ export class SideNavComponent implements OnInit {
           role: ['Admin', 'ProjectManager', 'Employee'],
         },
         {
-          label: 'Team Management',
+          label: 'Team',
           icon: 'group',
           route: '/team-management',
           role: ['Admin', 'ProjectManager'],
@@ -73,91 +73,91 @@ export class SideNavComponent implements OnInit {
       icon: 'monetization_on',
       children: null
     },
-    {
-      label: 'Communication',
-      icon: 'chat',
-      route: '',
-      role: ['Admin', 'ProjectManager', 'Employee'],
-      children: [
-        {
-          label: 'Chat',
-          icon: 'message',
-          route: '/chat',
-          role: ['Admin', 'ProjectManager', 'Employee'],
-        },
-        {
-          label: 'Messages',
-          icon: 'inbox',
-          route: '/messages',
-          role: ['Admin', 'ProjectManager', 'Employee'],
-        },
-        {
-          label: 'Notifications',
-          icon: 'notifications',
-          route: '/notifications',
-          role: ['Admin', 'ProjectManager', 'Employee'],
-        },
-        {
-          label: 'Announcements',
-          icon: 'announcement',
-          route: '/announcements',
-          role: ['Admin', 'ProjectManager'],
-        }
-      ]
-    },
-    {
-      label: 'Analytics & Reports',
-      icon: 'assessment',
-      route: '',
-      role: ['Admin', 'ProjectManager'],
-      children: [
-        {
-          label: 'Reports',
-          icon: 'bar_chart',
-          route: '/reports',
-          role: ['Admin', 'ProjectManager'],
-        },
-        {
-          label: 'Analytics',
-          icon: 'show_chart',
-          route: '/analytics',
-          role: ['Admin', 'ProjectManager'],
-        },
-      ]
-    },
-    {
-      label: 'Settings',
-      icon: 'settings',
-      route: '/settings',
-      role: ['Admin', 'ProjectManager'],
-      children: null
-    },
-    {
-      label: 'Admin Tools',
-      icon: 'build',
-      route: '',
-      role: ['Admin'],
-      children: [
-        {
-          label: 'System Logs',
-          icon: 'receipt_long',
-          route: '/system-logs',
-          role: ['Admin'],
-        },
-        {
-          label: 'Audit Trails',
-          icon: 'history',
-          route: '/audit-trails',
-          role: ['Admin'],
-        },
-        {
-          label: 'Backup & Restore',
-          icon: 'backup',
-          route: '/backup-restore',
-          role: ['Admin'],
-        }
-      ]
-    }
+    // {
+    //   label: 'Communication',
+    //   icon: 'chat',
+    //   route: '',
+    //   role: ['Admin', 'ProjectManager', 'Employee'],
+    //   children: [
+    //     {
+    //       label: 'Chat',
+    //       icon: 'message',
+    //       route: '/chat',
+    //       role: ['Admin', 'ProjectManager', 'Employee'],
+    //     },
+    //     {
+    //       label: 'Messages',
+    //       icon: 'inbox',
+    //       route: '/messages',
+    //       role: ['Admin', 'ProjectManager', 'Employee'],
+    //     },
+    //     {
+    //       label: 'Notifications',
+    //       icon: 'notifications',
+    //       route: '/notifications',
+    //       role: ['Admin', 'ProjectManager', 'Employee'],
+    //     },
+    //     {
+    //       label: 'Announcements',
+    //       icon: 'announcement',
+    //       route: '/announcements',
+    //       role: ['Admin', 'ProjectManager'],
+    //     }
+    //   ]
+    // },
+    // {
+    //   label: 'Analytics & Reports',
+    //   icon: 'assessment',
+    //   route: '',
+    //   role: ['Admin', 'ProjectManager'],
+    //   children: [
+    //     {
+    //       label: 'Reports',
+    //       icon: 'bar_chart',
+    //       route: '/reports',
+    //       role: ['Admin', 'ProjectManager'],
+    //     },
+    //     {
+    //       label: 'Analytics',
+    //       icon: 'show_chart',
+    //       route: '/analytics',
+    //       role: ['Admin', 'ProjectManager'],
+    //     },
+    //   ]
+    // },
+    // {
+    //   label: 'Settings',
+    //   icon: 'settings',
+    //   route: '/settings',
+    //   role: ['Admin', 'ProjectManager'],
+    //   children: null
+    // },
+    // {
+    //   label: 'Admin Tools',
+    //   icon: 'build',
+    //   route: '',
+    //   role: ['Admin'],
+    //   children: [
+    //     {
+    //       label: 'System Logs',
+    //       icon: 'receipt_long',
+    //       route: '/system-logs',
+    //       role: ['Admin'],
+    //     },
+    //     {
+    //       label: 'Audit Trails',
+    //       icon: 'history',
+    //       route: '/audit-trails',
+    //       role: ['Admin'],
+    //     },
+    //     {
+    //       label: 'Backup & Restore',
+    //       icon: 'backup',
+    //       route: '/backup-restore',
+    //       role: ['Admin'],
+    //     }
+    //   ]
+    // }
   ];
 
 

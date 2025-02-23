@@ -1,34 +1,3 @@
-/**
- *  public class Project : BaseEntity
- *  {
- *
- *
- *      [Required(ErrorMessage = "Project name is required")]
- *      public string? Name { get; set; }
- *
- *      public string? Description { get; set; }
- *
- *      [Required(ErrorMessage = "Start date is required")]
- *      [DataType(DataType.Date)]
- *      public DateTime StartDate { get; set; }
- *
- *      [Required(ErrorMessage = "End date is required")]
- *      [DataType(DataType.Date)]
- *      public DateTime EndDate { get; set; }
- *
- *      public Status Status { get; set; }
- *
- *      //navigation properties
- *      // Foreign key for the Project Manager
- *      [ForeignKey("ProjectManager")]
- *      public int? ProjectManagerID { get; set; }
- *      public virtual ProjectManager? ProjectManager { get; set; }
- *
- *      // Relationship: One Project can have multiple tasks
- *      public virtual ICollection<ProjectTask>? ProjectTasks { get; set; }
- *
- *  }
- */
 import {ProjectManager} from '../../project-manager/model/project-manager';
 import {ProjectTask} from '../../project-task/models/project-task';
 

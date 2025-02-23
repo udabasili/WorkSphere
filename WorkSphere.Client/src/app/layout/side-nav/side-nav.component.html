@@ -57,15 +57,18 @@
           <li *ngFor="let child of link?.children">
             <a
               (click)="setActiveItem(child.route)"
+              [ngClass]="{'text-black bg-white': child.route === activeItem}"
               [routerLink]="child.route"
-              class="flex items-center space-x-4 mb-2 rounded-lg cursor-pointer w-[4/5] justify-stretch py-3 px-2.5 {{child.route === activeItem ? 'text-black bg-white' : ''}}">
+              class="flex items-center space-x-4 mb-2 rounded-lg cursor-pointer w-4/5 justify-stretch py-3 px-2.5">
               <mat-icon
+                [fontIcon]="child.icon"
                 aria-hidden="false"
                 aria-label="Child Icon"
-                class="flex items-center"
-                fontIcon="{{child.icon}}">
+                class="flex items-center">
               </mat-icon>
-              <span class="md:hidden lg:flex font-semibold text-heading">{{ child.label }}</span>
+              <span class="md:hidden lg:flex font-semibold text-heading text-md">
+    {{ child.label }}
+  </span>
             </a>
           </li>
         </ul>

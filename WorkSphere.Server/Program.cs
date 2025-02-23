@@ -35,16 +35,21 @@ namespace WorkSphere.Server
             builder.Logging.ClearProviders();
             builder.Logging.AddConsole();
 
+
             builder.Services.AddCors(options =>
             {
                 options.AddPolicy(name: MyAllowSpecificOrigins,
                                   policy =>
                                   {
-                                      policy.WithOrigins("http://127.0.0.1:4200", "http://localhost:4200", "https://work-sphere-app.netlify.app/", "https://work-sphere-app.netlify.app/") // Explicitly allow the frontend origin
-                                            .AllowAnyHeader() // Allow any headers
-                                            .AllowAnyMethod(); // Allow any HTTP methods (GET, POST, etc.)
+                                      policy.WithOrigins("http://127.0.0.1:4200",
+                                                         "http://localhost:4200",
+                                                         "https://work-sphere-app.netlify.app") // Remove trailing slash
+                                            .AllowAnyHeader()
+                                            .AllowAnyMethod()
+                                            .AllowCredentials(); // Allow cookies, authentication headers, etc.
                                   });
             });
+
 
             //add the connection string to the services
 

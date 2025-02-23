@@ -27,11 +27,8 @@ export class TeamsComponent implements OnInit, OnDestroy {
   teams: Array<Team> = []
   showDetailsTeam: boolean = false;
   totalRecords = 0;
+  private subscriptions: Subscription[] = [];
 
-  private deleteTeamSubscription?: Subscription;
-  private getTeamSubscription?: Subscription;
-  private routerSubscription?: Subscription;
-  private getTeamsSubscription?: Subscription;
 
   constructor(
     private teamManagementService: TeamManagementService,
@@ -45,22 +42,22 @@ export class TeamsComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.handleRouteTeamSelection();
+    this.subscriptions.push(
+      this.teamManagementService.teamResponse$.subscribe((response) => {
+        if (response) {
+          this.teams = response.teams;
+          this.totalRecords = response.totalRecords;
+          this.pageIndex = response.pageIndex;
+          this.pageSize = response.pageSize;
+          this.isLoading = false;
+        }
+      })
+    );
 
   }
 
   ngOnDestroy(): void {
-    if (this.getTeamsSubscription) {
-      this.getTeamsSubscription.unsubscribe();
-    }
-    if (this.deleteTeamSubscription) {
-      this.deleteTeamSubscription.unsubscribe();
-    }
-    if (this.getTeamSubscription) {
-      this.getTeamSubscription.unsubscribe();
-    }
-    if (this.routerSubscription) {
-      this.routerSubscription.unsubscribe();
-    }
+    this.subscriptions.forEach(sub => sub.unsubscribe());
     this.showDetailsTeam = false;
     this.selectedTeamId = null;
 
@@ -84,45 +81,36 @@ export class TeamsComponent implements OnInit, OnDestroy {
   }
 
   private handleRouteTeamSelection(): void {
-    this.routerSubscription = this.route.queryParams.subscribe({
-      next: async (params) => {
-        if (params['id']) {
-          const teamId = parseInt(params['id'], 10);
-          this.showDetailsTeam = true;
-          this.selectedTeamId = teamId;
-          this.items = [{label: 'Teams', url: 'team-management'}, {
-            label: `${teamId}`,
-            url: '/team-management',
-            queryParams: {id: teamId}
-          }]
+    this.subscriptions.push(
+      this.route.queryParams.subscribe({
+        next: async (params) => {
+          if (params['id']) {
+            const teamId = parseInt(params['id'], 10);
+            this.showDetailsTeam = true;
+            this.selectedTeamId = teamId;
+            this.items = [{label: 'Teams', url: 'team-management'}, {
+              label: `${teamId}`,
+              url: '/team-management',
+              queryParams: {id: teamId}
+            }]
 
-        } else {
-          await this.getTeams();
-          this.showDetailsTeam = false
-          this.items = [{label: 'Teams', url: '/team-management'}]
+          } else {
+            await this.teamManagementService.getTeams(this.pageIndex, this.pageSize);
+            this.showDetailsTeam = false
+            this.items = [{label: 'Teams', url: '/team-management'}]
+          }
+
+        },
+        error: (error) => {
+          this.errorHandlerService.apiErrorHandler(error);
         }
-
-      },
-      error: (error) => {
-        this.errorHandlerService.apiErrorHandler(error);
-      }
-    });
+      })
+    );
   }
 
-  private getTeams(): void {
-    this.getTeamsSubscription = this.teamManagementService.getTeams(0, 10).subscribe({
-      next: (response) => {
-        this.teams = response.teams;
-        this.totalRecords = response.totalRecords;
-        this.pageSize = response.pageSize;
-        this.pageIndex = response.pageIndex
-        this.isLoading = false;
-
-      },
-      error: (error) => {
-        this.isLoading = false;
-        this.errorHandlerService.apiErrorHandler(error);
-      }
-    })
+  private getTeams(pageIndex: number = 0, pageSize: number): void {
+    this.teamManagementService.refetchTeams(pageIndex, pageSize);
   }
+
+
 }

@@ -204,7 +204,7 @@ export class SalariesComponent implements OnInit, OnDestroy {
             }]
 
           } else {
-            this.getSalaries(this.pageIndex, this.pageSize);
+            this.salaryService.getSalaries(this.pageIndex, this.pageSize);
             this.showDetailsSalary = false
             this.items = [{label: 'salaries', url: '/salaries'}]
 

@@ -57,9 +57,14 @@ import {TeamDetailsComponent} from './features/team-managment/components/team-de
 import {ManageTeamComponent} from './features/team-managment/components/manage-team/manage-team.component';
 import {Dialog} from "primeng/dialog";
 import {TextareaModule} from 'primeng/textarea';
-import { SalaryDetailsComponent } from './features/salary/components/salary-details/salary-details.component';
-import { ManageSalaryComponent } from './features/salary/components/manage-salary/manage-salary.component';
-import { SalariesComponent } from './features/salary/components/salaries/salaries.component';
+import {SalaryDetailsComponent} from './features/salary/components/salary-details/salary-details.component';
+import {ManageSalaryComponent} from './features/salary/components/manage-salary/manage-salary.component';
+import {SalariesComponent} from './features/salary/components/salaries/salaries.component';
+import {Skeleton} from "primeng/skeleton";
+import {
+  ProjectTaskChartComponent
+} from './features/dashboard/components/project-task-chart/project-task-chart.component';
+import {BaseChartDirective, provideCharts, withDefaultRegisterables} from 'ng2-charts';
 
 
 @NgModule({
@@ -86,6 +91,7 @@ import { SalariesComponent } from './features/salary/components/salaries/salarie
     SalaryDetailsComponent,
     ManageSalaryComponent,
     SalariesComponent,
+    ProjectTaskChartComponent,
 
   ],
   imports: [
@@ -124,7 +130,9 @@ import { SalariesComponent } from './features/salary/components/salaries/salarie
     CdkDropList,
     CdkDrag,
     Dialog,
-    ButtonDirective
+    ButtonDirective,
+    Skeleton,
+    BaseChartDirective
   ],
   providers: [
     provideHttpClient(),
@@ -133,6 +141,7 @@ import { SalariesComponent } from './features/salary/components/salaries/salarie
     DatePipe,
     MessageService,
     ConfirmationService,
+    provideCharts(withDefaultRegisterables()),
     {provide: HTTP_INTERCEPTORS, useClass: HttpErrorInterceptor, multi: true},
     providePrimeNG({
       theme: {

@@ -31,15 +31,12 @@ export class AppComponent implements OnInit, OnDestroy {
     this.authSub = this.authService.getAuthStatusListener().subscribe({
       next: (response) => {
         this.userIsAuthenticated = response.isAuthenticated;
-        console.log(response.isAuthenticated);
         if (this.userIsAuthenticated) {
           this.user = response.user;
-        } else {
-          // Removed redundant router navigation to '/auth/login'
         }
       },
       error: (err) => {
-        // Removed redundant router navigation to '/auth/login'
+        console.log(err);
       }
     })
   }
@@ -53,6 +50,6 @@ export class AppComponent implements OnInit, OnDestroy {
   private timerTest(): void {
     setTimeout(() => {
       this.isLoading = false;
-    }, 2000);  // Simulate loading
+    }, 1000);
   }
 }

@@ -1,15 +1,12 @@
 <app-full-page-loader *ngIf="isLoading"></app-full-page-loader>
-
 <main *ngIf="userIsAuthenticated && !isLoading" class="bg-background h-screen flex">
   <app-side-nav
   ></app-side-nav>
   <div class="md:ml-0 lg:ml-64 flex-1 overflow-y-auto p-0 md:p-5">
-    <!-- Sticky Top Navbar -->
     <app-nav
       [userIsAuthenticated]="userIsAuthenticated"
       [user]="user"
     ></app-nav>
-    <!-- Scrollable Content Section -->
     <section class="p-6">
       <router-outlet></router-outlet>
     </section>

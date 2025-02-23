@@ -319,3 +319,4 @@ Thumbs.db
 
 # Local Netlify folder
 .netlify
+/WorkSphere.Server/appsettings.json

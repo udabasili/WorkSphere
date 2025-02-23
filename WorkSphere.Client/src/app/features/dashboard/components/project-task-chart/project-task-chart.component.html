@@ -1,0 +1,10 @@
+<div *ngIf="barChartData" class="chart-container">
+  <canvas [data]="barChartData"
+          [legend]="barChartLegend"
+          [options]="barChartOptions"
+          [plugins]="barChartPlugins"
+          [type]="'bar'"
+          baseChart>
+  </canvas>
+</div>
+

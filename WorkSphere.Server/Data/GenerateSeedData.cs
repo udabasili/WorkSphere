@@ -82,24 +82,28 @@ public class SeedData
             UserName = "admin@test.com",
             Email = "admin@test.com",
             EmailConfirmed = true,
-            Role = Role.Admin.ToString()
+            Role = Enums.Roles.Admin.ToString() // Set the Role property
         };
 
-        if (userManager.Users.All(u => u.Id != defaultUser.Id))
+        // Check if the Admin role exists, and create it if not
+        if (!await roleManager.RoleExistsAsync(Enums.Roles.Admin.ToString()))
         {
-            // Create user with password
-            var user = await userManager.FindByEmailAsync(defaultUser.Email);
-            if (user == null)
-            {
-                await userManager.CreateAsync(defaultUser, "Password123!");
-                await userManager.AddToRoleAsync(defaultUser, Enums.Roles.Admin.ToString());
-                await userManager.AddToRoleAsync(defaultUser, Enums.Roles.Employee.ToString());
-                await userManager.AddToRoleAsync(defaultUser, Enums.Roles.ProjectManager.ToString());
-            }
+            await roleManager.CreateAsync(new IdentityRole(Enums.Roles.Admin.ToString()));
         }
 
-
+        // Ensure the user does not already exist before creating
+        var user = await userManager.FindByEmailAsync(defaultUser.Email);
+        if (user == null)
+        {
+            var createUserResult = await userManager.CreateAsync(defaultUser, "Password123!");
+            if (createUserResult.Succeeded)
+            {
+                await userManager.AddToRoleAsync(defaultUser, Enums.Roles.Admin.ToString());
+            }
+        }
     }
+
+
 
 
     public static async Task SeedEmployeeAsync(WorkSphereDbContext context)

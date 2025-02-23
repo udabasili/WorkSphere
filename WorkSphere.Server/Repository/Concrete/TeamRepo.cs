@@ -28,6 +28,18 @@ namespace WorkSphere.Server.Repository.Concrete
         public async Task<PagedTeamResponseDto> GetPagedTeams(int pageIndex, int pageSize)
         {
             var teams = await GetTeams();
+
+            if (pageSize == 0)
+            {
+                return new PagedTeamResponseDto
+                {
+                    Teams = teams,
+                    TotalCount = teams.Count,
+                    PageIndex = pageIndex,
+                    PageSize = pageSize
+                };
+            }
+
             var pagedTeams = teams.Skip(pageIndex * pageSize).Take(pageSize).ToList();
             return new PagedTeamResponseDto
             {

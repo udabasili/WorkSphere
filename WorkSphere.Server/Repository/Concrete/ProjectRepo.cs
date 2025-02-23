@@ -18,7 +18,7 @@ namespace WorkSphere.Server.Repository.Concrete
         public async Task<PagedProjectsResponseDto> GetPagedProjectsAsync(int pageIndex = 0, int pageSize = 10)
         {
             var projects = new List<Project>();
-            if (pageIndex <= 0 || pageSize <= 0)
+            if (pageSize == 0)
             {
                 projects = await _context.Projects
                .Include(project => project.ProjectManager)

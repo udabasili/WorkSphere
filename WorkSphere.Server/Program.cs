@@ -1,8 +1,11 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Serilog;
 using Serilog.Events;
+using System.Text;
 using System.Text.Json.Serialization;
 using WorkSphere.Data;
 using WorkSphere.Server.Data;
@@ -128,6 +131,7 @@ namespace WorkSphere.Server
             builder.Services.AddScoped<ITeamRepo, TeamRepo>();
             builder.Services.AddScoped<IProjectManagerRepo, ProjectManagerRepo>();
             builder.Services.AddScoped<ISalaryRepo, SalaryRepo>();
+            builder.Services.AddScoped<ILoginRepo, LoginRepo>();
 
             // Register Services
             builder.Services.AddScoped<IProjectService, ProjectService>();
@@ -136,9 +140,53 @@ namespace WorkSphere.Server
             builder.Services.AddScoped<ITeamService, TeamService>();
             builder.Services.AddScoped<IProjectManagerService, ProjectManagerService>();
             builder.Services.AddScoped<ISalaryService, SalaryService>();
+            builder.Services.AddScoped<ILoginService, LoginService>();
+            builder.Services.AddScoped<ITokenService, TokenService>();
 
             // Register AutoMapper
             builder.Services.AddAutoMapper(typeof(MappingProfile));
+
+            builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
+            {
+                string? jwtKey = builder.Configuration["Jwt:Key"];
+                if (string.IsNullOrEmpty(jwtKey))
+                {
+                    throw new InvalidOperationException("Jwt:Key is not configured.");
+                }
+
+                options.TokenValidationParameters = new()
+                {
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey)),
+                    ValidateIssuer = false,
+                    ValidateAudience = false
+                };
+            });
+
+            // Configure authorization policies.
+            builder.Services.AddAuthorization(options =>
+            {
+                options.AddPolicy("Admin", policy =>
+                {
+                    policy.RequireRole("Admin");
+                });
+            });
+
+            builder.Services.AddAuthorization(options =>
+            {
+                options.AddPolicy("ProjectManager", policy =>
+                {
+                    policy.RequireRole("ProjectManager");
+                });
+            });
+
+            builder.Services.AddAuthorization(options =>
+            {
+                options.AddPolicy("Employee", policy =>
+                {
+                    policy.RequireRole("Employee");
+                });
+            });
 
             var app = builder.Build();
 

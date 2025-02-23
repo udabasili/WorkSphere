@@ -1,5 +1,7 @@
+import {User} from './user';
+
 export class AuthStatus {
-  username: string
+  user: User
   isAuthenticated: boolean
 
 }

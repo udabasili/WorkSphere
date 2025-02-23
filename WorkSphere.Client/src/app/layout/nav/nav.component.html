@@ -10,32 +10,24 @@
     </button>
   </div>
   <div class="flex items-center gap-4">
-    <!--    <nav aria-label="Secondary navigation" class="flex">-->
-    <!--      <ul class="flex gap-4">-->
-    <!--        <li class="demo-section">-->
-    <!--          <mat-icon matBadge="15">home</mat-icon>-->
-    <!--          <span class="cdk-visually-hidden">-->
-    <!--            Example with a home icon with overlaid badge showing the number 15-->
-    <!--          </span>-->
-    <!--        </li>-->
-    <!--        <li class="demo-section">-->
-    <!--          <mat-icon matBadge="15">home</mat-icon>-->
-    <!--          <span class="cdk-visually-hidden">-->
-    <!--            Example with a home icon with overlaid badge showing the number 15-->
-    <!--          </span>-->
-    <!--        </li>-->
-    <!--      </ul>-->
-    <!--    </nav>-->
-
     <div class="flex items-center gap-4">
       <div
         class="relative inline-flex items-center justify-center w-10 h-10 overflow-hidden bg-gray-100 rounded-full dark:bg-gray-600">
-        <span class="font-medium text-gray-600 dark:text-gray-300">JL</span>
+        <span class="font-medium text-gray-600 dark:text-gray-300">
+          {{ user.username.charAt(0) }}
+        </span>
       </div>
       <div class="font-medium">
-        <div>Jese Leos</div>
-        <div class="text-sm text-gray-500 dark:text-gray-400">Joined in August 2014</div>
+        <div>{{ user.username }}</div>
+        <div class="text-sm text-gray-500 dark:text-gray-400">{{ user.role }}</div>
       </div>
+      <button
+        (click)="logout()"
+        class="text-white bg-primary hover:opacity-75 cursor-pointer font-medium rounded-lg text-sm p-2.5 text-center inline-flex items-center">
+        <mat-icon aria-hidden="false" aria-label="Example logout icon" class="flex items-center"
+                  fontIcon="logout"></mat-icon>
+        <span class="sr-only">Icon description</span>
+      </button>
     </div>
   </div>
 </header>

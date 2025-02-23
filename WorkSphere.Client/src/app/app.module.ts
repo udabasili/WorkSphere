@@ -4,7 +4,7 @@ import {BrowserModule} from '@angular/platform-browser';
 import {AppRoutingModule} from './app-routing.module';
 import {AppComponent} from './app.component';
 import {DashboardComponent} from './features/dashboard/components/dashboard.component';
-import {HTTP_INTERCEPTORS, provideHttpClient} from '@angular/common/http';
+import {HTTP_INTERCEPTORS, provideHttpClient, withInterceptorsFromDi} from '@angular/common/http';
 import {provideAnimationsAsync} from '@angular/platform-browser/animations/async';
 import {MatSlideToggle, MatSlideToggleModule} from '@angular/material/slide-toggle';
 import {MatGridListModule} from '@angular/material/grid-list';
@@ -24,7 +24,7 @@ import {Button, ButtonDirective} from 'primeng/button';
 import {providePrimeNG} from 'primeng/config';
 import Aura from '@primeng/themes/aura';
 import {MatBadge} from '@angular/material/badge';
-import {HttpErrorInterceptor} from './core/interceptors/http-error.interceptor';
+import {HttpErrorInterceptor} from './core/interceptors/http-error/http-error.interceptor';
 import {ActivityComponent} from './shared/components/activity/activity.component';
 import {IftaLabel} from 'primeng/iftalabel';
 import {InputText} from 'primeng/inputtext';
@@ -65,6 +65,11 @@ import {
   ProjectTaskChartComponent
 } from './features/dashboard/components/project-task-chart/project-task-chart.component';
 import {BaseChartDirective, provideCharts, withDefaultRegisterables} from 'ng2-charts';
+import {LoginComponent} from './features/auth/components/login/login.component';
+import {AuthGuard} from './core/guards/auth.guard';
+import {AuthInterceptor} from './core/interceptors/auth/auth.interceptor';
+import {FullPageLoaderComponent} from './features/auth/components/full-page-loader/full-page-loader.component';
+import {ProgressSpinner} from 'primeng/progressspinner';
 
 
 @NgModule({
@@ -92,6 +97,8 @@ import {BaseChartDirective, provideCharts, withDefaultRegisterables} from 'ng2-c
     ManageSalaryComponent,
     SalariesComponent,
     ProjectTaskChartComponent,
+    LoginComponent,
+    FullPageLoaderComponent,
 
   ],
   imports: [
@@ -132,22 +139,26 @@ import {BaseChartDirective, provideCharts, withDefaultRegisterables} from 'ng2-c
     Dialog,
     ButtonDirective,
     Skeleton,
-    BaseChartDirective
+    BaseChartDirective,
+    ProgressSpinner
   ],
   providers: [
-    provideHttpClient(),
+    provideHttpClient(withInterceptorsFromDi()),
+    {provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true},
+    {provide: HTTP_INTERCEPTORS, useClass: HttpErrorInterceptor, multi: true},
+    AuthGuard,
     provideAnimationsAsync(),
     MatSlideToggleModule,
     DatePipe,
     MessageService,
     ConfirmationService,
     provideCharts(withDefaultRegisterables()),
-    {provide: HTTP_INTERCEPTORS, useClass: HttpErrorInterceptor, multi: true},
     providePrimeNG({
       theme: {
         preset: Aura
       }
-    })
+    }),
+
 
   ],
   bootstrap: [AppComponent]

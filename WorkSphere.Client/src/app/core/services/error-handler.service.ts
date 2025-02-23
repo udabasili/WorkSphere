@@ -2,10 +2,20 @@ import {Injectable} from '@angular/core';
 import {HttpErrorResponse} from '@angular/common/http';
 import {ToastService} from '../../services/toast.service';
 
-interface ApiErrorResponse {
-  errors?: { [key: string]: string[] | string };
-  message?: string;
+interface ApiError {
+  id: number;
+  description: string;
+  errorType: number;
 }
+
+interface ApiErrorResponse {
+  type?: string;
+  title?: string;
+  status?: number;
+  errors?: ApiError[];
+  traceId?: string;
+}
+
 
 @Injectable({
   providedIn: 'root'
@@ -59,29 +69,25 @@ export class ErrorHandlerService {
     }
 
     if (err.status === 404) {
-      this.toastService.showError('Resource not found.');
+      this.toastService.showError('Resource not found: The requested API endpoint does not exist.');
+      return;
+    }
+
+    if (err.status === 405) {
+      this.toastService.showError('Method Not Allowed: The requested method is not supported.');
       return;
     }
 
     if (err.status === 400 && error.errors) {
-      // Handle validation errors
-      Object.keys(error.errors).forEach(key => {
-        if (Array.isArray(error.errors[key])) {
-          error.errors[key].forEach((message: string) => this.toastService.showError(message));
-        } else {
-          this.toastService.showError(error.errors[key]);
-        }
+      // Handle validation errors from the API response
+      error.errors.forEach((apiError: ApiError) => {
+        this.toastService.showError(apiError.description);
       });
       return;
     }
-    //not allowed 405 error
-    if (err.status === 405) {
-      this.toastService.showError('Method not allowed');
-      return;
-    }
 
-    if (error.message) {
-      this.toastService.showError(error.message);
+    if (error.title) {
+      this.toastService.showError(error.title);
     } else {
       this.toastService.showError(`Client error (${err.status}): ${err.statusText}`);
     }

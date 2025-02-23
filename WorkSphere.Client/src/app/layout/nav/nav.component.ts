@@ -1,5 +1,6 @@
-import {Component, OnDestroy, OnInit} from '@angular/core';
-import {Subscription} from 'rxjs';
+import {Component, Input, OnDestroy, OnInit} from '@angular/core';
+import {AuthService} from '../../features/auth/services/auth.service';
+import {User} from '../../features/auth/models/user';
 
 @Component({
   selector: 'app-nav',
@@ -10,8 +11,14 @@ import {Subscription} from 'rxjs';
 })
 
 
-export class NavComponent implements  OnInit, OnDestroy{
-  windowListenerSub?: Subscription
+export class NavComponent implements OnInit, OnDestroy {
+  @Input() userIsAuthenticated: boolean = false;
+  @Input() user: User | null = null;
+
+  constructor(
+    private authService: AuthService
+  ) {
+  }
 
   ngOnInit(): void {
     window.addEventListener('resize', this.clearEncodedHtml)
@@ -21,19 +28,23 @@ export class NavComponent implements  OnInit, OnDestroy{
     window.removeEventListener('resize', this.clearEncodedHtml)
   }
 
-  openSideNav () {
+  openSideNav() {
     const sideNav = document.getElementById('side-nav');
-    console.log(sideNav,  window.innerWidth)
+    console.log(sideNav, window.innerWidth)
     if (sideNav && window.innerWidth < 768) {
       sideNav.style.width = '50vw';
     }
   }
 
-  clearEncodedHtml(){
+  clearEncodedHtml() {
     const sideNav = document.getElementById('side-nav');
     if (sideNav && window.innerWidth > 768) {
       sideNav.style.width = '';
     }
+  }
+
+  logout() {
+    this.authService.logout();
   }
 
 

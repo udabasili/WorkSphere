@@ -1,16 +1,21 @@
-<main class="bg-background h-screen flex">
-  <!-- Fixed Sidebar -->
-  <app-side-nav></app-side-nav>
+<app-full-page-loader *ngIf="isLoading"></app-full-page-loader>
 
-  <!-- Main Content Area -->
-  <div class=" md:ml-0 lg:ml-64 flex-1 overflow-y-auto p-0 md:p-5">
+<main *ngIf="userIsAuthenticated && !isLoading" class="bg-background h-screen flex">
+  <app-side-nav
+  ></app-side-nav>
+  <div class="md:ml-0 lg:ml-64 flex-1 overflow-y-auto p-0 md:p-5">
     <!-- Sticky Top Navbar -->
-    <app-nav></app-nav>
-
+    <app-nav
+      [userIsAuthenticated]="userIsAuthenticated"
+      [user]="user"
+    ></app-nav>
     <!-- Scrollable Content Section -->
     <section class="p-6">
       <router-outlet></router-outlet>
     </section>
   </div>
 </main>
+<!-- Show login only when the user is not authenticated and it's the login page -->
+<app-login *ngIf="!userIsAuthenticated && !isLoading && router.url === '/auth/login'"></app-login>
+
 

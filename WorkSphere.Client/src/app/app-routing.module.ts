@@ -9,58 +9,81 @@ import {
 import {TasksComponent} from './features/task/components/tasks/tasks.component';
 import {TeamsComponent} from './features/team-managment/components/teams/teams.component';
 import {SalariesComponent} from './features/salary/components/salaries/salaries.component';
+import {LoginComponent} from './features/auth/components/login/login.component';
+import {AuthGuard} from './core/guards/auth.guard';
 
 const routes: Routes = [
   {
     path: '',
-    component: DashboardComponent
+    component: DashboardComponent,
+    canActivate: [AuthGuard]
+
   },
   //Employees route
   {
     path: 'employees',
-    component: EmployeesComponent
+    component: EmployeesComponent,
+    // canActivate: [AuthGuard]
   },
-  {path: 'employees/:id', component: EmployeesComponent},
+  {
+    path: 'employees/:id',
+    component: EmployeesComponent,
+    canActivate: [AuthGuard]
+  },
   //Projects route
   {
     path: 'projects',
-    component: ProjectsComponent
+    component: ProjectsComponent,
+    canActivate: [AuthGuard]
   },
   {
     path: 'projects/:id',
-    component: ProjectsComponent
+    component: ProjectsComponent,
+    canActivate: [AuthGuard]
   },
   //Project Managers route
   {
     path: 'project-managers',
-    component: ProjectManagersComponent
+    component: ProjectManagersComponent,
+    canActivate: [AuthGuard]
   },
   {
     path: 'project-managers/:id',
-    component: ProjectManagersComponent
+    component: ProjectManagersComponent,
+    canActivate: [AuthGuard]
   },
   //Tasks route
   {
     path: 'tasks',
-    component: TasksComponent
+    component: TasksComponent,
+    canActivate: [AuthGuard]
   },
   //team-management route
   {
     path: 'team-management',
-    component: TeamsComponent
+    component: TeamsComponent,
+    canActivate: [AuthGuard]
   },
   {
     path: 'team-management/:id',
-    component: TeamsComponent
+    component: TeamsComponent,
+    canActivate: [AuthGuard]
   },
   //salary route
   {
     path: 'salaries',
-    component: SalariesComponent
+    component: SalariesComponent,
+    canActivate: [AuthGuard]
   },
   {
     path: 'salaries/:id',
-    component: SalariesComponent
+    component: SalariesComponent,
+    canActivate: [AuthGuard]
+  },
+  //Login route
+  {
+    path: 'auth/login',
+    component: LoginComponent,
   }
 
 ];

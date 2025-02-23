@@ -1,15 +1,58 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
-import {EmployeeService} from './features/employees/services/employee.service';
+import {AuthService} from './features/auth/services/auth.service';
+import {Router} from '@angular/router';
 import {Subscription} from 'rxjs';
+import {User} from './features/auth/models/user';
 
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
-  standalone: false,
-  styleUrl: './app.component.css'
+  styleUrls: ['./app.component.css'],
+  standalone: false
 })
-export class AppComponent  {
+export class AppComponent implements OnInit, OnDestroy {
   title = 'WorkSphere.Client';
+  userIsAuthenticated = false;
+  user: User | null = null;
+  authSub?: Subscription;
+  isLoading = true;
 
+  constructor(private authService: AuthService, public router: Router) {
+  }
 
+  ngOnInit(): void {
+    const token = this.authService.getToken();
+    if (token) {
+      this.authService.verifyUser();
+    }
+
+    this.timerTest();
+
+    this.authSub = this.authService.getAuthStatusListener().subscribe({
+      next: (response) => {
+        this.userIsAuthenticated = response.isAuthenticated;
+        console.log(response.isAuthenticated);
+        if (this.userIsAuthenticated) {
+          this.user = response.user;
+        } else {
+          // Removed redundant router navigation to '/auth/login'
+        }
+      },
+      error: (err) => {
+        // Removed redundant router navigation to '/auth/login'
+      }
+    })
+  }
+
+  ngOnDestroy(): void {
+    if (this.authSub) {
+      this.authSub.unsubscribe();
+    }
+  }
+
+  private timerTest(): void {
+    setTimeout(() => {
+      this.isLoading = false;
+    }, 2000);  // Simulate loading
+  }
 }

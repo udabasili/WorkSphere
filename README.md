@@ -6,7 +6,7 @@
 <h3 align="center">WorkSphere</h3>
 
   <p align="center">
-Welcome to **WorkSphere**, a project management and employee salary management system designed for seamless collaboration and efficiency.
+This is WorkSphere, a  project management and employee salary management system designed for seamless collaboration and efficiency.
     <br />
     <a href="https://work-sphere-app.netlify.app/">View Demo</a>
     ·

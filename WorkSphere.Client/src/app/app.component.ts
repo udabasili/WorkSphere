@@ -50,6 +50,6 @@ export class AppComponent implements OnInit, OnDestroy {
   private timerTest(): void {
     setTimeout(() => {
       this.isLoading = false;
-    }, 1000);
+    }, 3000);
   }
 }

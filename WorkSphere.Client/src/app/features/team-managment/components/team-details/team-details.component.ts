@@ -226,6 +226,7 @@ export class TeamDetailsComponent implements OnDestroy, OnInit {
    * @private
    */
   private loadAvailableProjectManagers() {
+    this.projectManagerService.getProjectManagers(0, 30);
     this.subscriptions.push(
       this.projectManagerService.projectManagerResponse$.subscribe(response => {
         if (response) {
@@ -233,7 +234,6 @@ export class TeamDetailsComponent implements OnDestroy, OnInit {
         }
       })
     );
-    this.projectManagerService.getProjectManagers(0, 30);
   }
 
   /**
@@ -242,6 +242,7 @@ export class TeamDetailsComponent implements OnDestroy, OnInit {
    * @private
    */
   private loadAvailableTeamMembers() {
+    this.employeeService.getEmployees(0, 30);
     this.subscriptions.push(
       this.employeeService.employeeResponse$.subscribe(async response => {
         if (response) {
@@ -250,7 +251,6 @@ export class TeamDetailsComponent implements OnDestroy, OnInit {
         }
       })
     );
-    this.employeeService.getEmployees(0, 30);
   }
 
   /**

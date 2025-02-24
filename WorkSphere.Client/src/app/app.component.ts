@@ -11,7 +11,7 @@ import {User} from './features/auth/models/user';
   standalone: false
 })
 export class AppComponent implements OnInit, OnDestroy {
-  title = 'WorkSphere.Client';
+  title = 'WorkSphere App';
   userIsAuthenticated = false;
   user: User | null = null;
   authSub?: Subscription;
@@ -26,7 +26,6 @@ export class AppComponent implements OnInit, OnDestroy {
       this.authService.verifyUser();
     }
 
-    this.timerTest();
 
     this.authSub = this.authService.getAuthStatusListener().subscribe({
       next: (response) => {
@@ -34,10 +33,13 @@ export class AppComponent implements OnInit, OnDestroy {
         if (this.userIsAuthenticated) {
           this.user = response.user;
         }
+        this.isLoading = false;
       },
       error: (err) => {
         console.log(err);
+        this.isLoading = false;
       }
+
     })
   }
 

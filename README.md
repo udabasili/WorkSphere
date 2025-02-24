@@ -1,6 +1,6 @@
 # WorkSphere
 
-![WorkSphere Logo](https://github.com/user-attachments/assets/6e5e6aa1-3197-40ea-88ec-5191c149f96f)
+<img src="https://github.com/user-attachments/assets/6e5e6aa1-3197-40ea-88ec-5191c149f96f" alt="Logo" width="80" height="80">
 
 Welcome to **WorkSphere**, a project management and employee salary management system designed for seamless collaboration and efficiency.
 

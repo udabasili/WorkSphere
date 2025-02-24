@@ -1,10 +1,23 @@
 # WorkSphere
 
-<img src="https://github.com/user-attachments/assets/6e5e6aa1-3197-40ea-88ec-5191c149f96f" alt="Logo" width="80" height="80">
+<div align="center">
+  <img src="https://github.com/user-attachments/assets/6e5e6aa1-3197-40ea-88ec-5191c149f96f" alt="Logo" width="80" height="80">
 
+<h3 align="center">WorkSphere</h3>
+
+  <p align="center">
 Welcome to **WorkSphere**, a project management and employee salary management system designed for seamless collaboration and efficiency.
-
-🔗 **Live Website:** [WorkSphere](https://work-sphere-app.netlify.app/)
+    <br />
+    <a href="https://github.com/udabasili/WorkSphere.git"><strong>Explore the docs »</strong></a>
+    <br />
+    <br />
+    <a href="https://work-sphere-app.netlify.app/">View Demo</a>
+    ·
+    <a href="https://github.com/udabasili/WorkSphere/issues">Report Bug</a>
+    ·
+    <a href="https://github.com/udabasili/WorkSphere/issues/new?labels=enhancement&template=feature-request---.md">Request Feature</a>
+  </p>
+</div>
 
 ## Table of Contents
 

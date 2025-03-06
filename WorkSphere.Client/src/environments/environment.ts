@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  apiUrl: 'https://worksphereserver.azurewebsites.net'
+  apiUrl: 'http://workspherebackend.me'
 }

@@ -60,9 +60,18 @@ namespace WorkSphere.Server
             if (builder.Environment.IsDevelopment())
             {
                 builder.Services.AddDbContext<WorkSphereDbContext>(options =>
-                    options
-                        .UseSqlServer(builder.Configuration.GetConnectionString("LocalConnection"))
-                );
+                     options.UseSqlServer(builder.Configuration.GetConnectionString("LocalConnection"),
+                         sqlServerOptions =>
+                         {
+                             sqlServerOptions.EnableRetryOnFailure(
+                                 maxRetryCount: 5, // Number of retry attempts
+                                 maxRetryDelay: TimeSpan.FromSeconds(10), // Wait time before retrying
+                                 errorNumbersToAdd: null // Use default transient error list
+                             );
+                             sqlServerOptions.CommandTimeout(60); // Increase timeout to 60s
+                         }
+                     )
+                 );
             }
             else
             {
@@ -219,8 +228,9 @@ namespace WorkSphere.Server
 
             // Configure the HTTP request pipeline.
 
-            app.UseHttpsRedirection();
+            // app.UseHttpsRedirection();
             app.UseCors(MyAllowSpecificOrigins);
+            app.UseForwardedHeaders();
 
 
 

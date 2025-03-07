@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  apiUrl: 'http://workspherebackend.me'
+  apiUrl: 'https://workspherebackend.me'
 }
